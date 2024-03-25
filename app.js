@@ -2,6 +2,8 @@ const express = require("express");
 const morgan = require("morgan");
 const AppError = require("./Utils/appError");
 const globalErrorHandler = require("./Controllers/errorController");
+const userRouter = require("./Routes/userRoutes");
+const adminRouter = require("./Routes/adminRoutes");
 
 const app = express();
 app.use(express.json());
@@ -13,7 +15,8 @@ if(process.env.NODE_ENV === "development"){
 }
 
 // ENDPOINT ROUTING BY MOUNTING e.g Mounting the router
-
+app.use("/api/v1/admin", adminRouter);
+app.use("/api/v1/users", userRouter);
 
 // HANDLING UNHANDLED ROUTE
 app.all("*", (req, res, next) => {
