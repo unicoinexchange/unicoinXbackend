@@ -2,8 +2,8 @@ const express = require("express");
 const morgan = require("morgan");
 const AppError = require("./Utils/appError");
 const globalErrorHandler = require("./Controllers/errorController");
-const userRouter = require("./Routes/userRoutes");
 const adminRouter = require("./Routes/adminRoutes");
+const userRouter = require("./Routes/userRoutes");
 
 const app = express();
 app.use(express.json());

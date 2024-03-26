@@ -14,6 +14,7 @@ const adminSchema = new mongoose.Schema({
         validate: [validator.isEmail, "Please provide a valid email"]
     },
     role:{
+        type:String,
         default:"admin"
     },
     password:{
