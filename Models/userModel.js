@@ -36,6 +36,7 @@ const userSchema = new  mongoose.Schema({
             message:"Password are not the same!"
         }
     },
+    passwordChangedAt: Date,
     otpToken: String,
     otpExpires: Date,
     active:{
@@ -55,6 +56,13 @@ userSchema.pre("save", async function(next){
 
     // delete passwordConfirm field
     this.passwordConfirm = undefined;
+    next();
+})
+
+userSchema.pre("save", function(next){
+    if(!this.isModified("password") || this.inNew) return next();
+
+    this.passwordChangedAt = Date.now() - 1000;
     next();
 })
 
