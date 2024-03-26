@@ -1,5 +1,5 @@
 const User = require("../Models/userModel");
-const Admin = require("../Models/adminModel");
+const { promisify } = require("util");
 const catchAsync = require("../Utils/catchAsync");
 const AppError = require("../Utils/appError");
 const Email = require("../Utils/email");
@@ -133,4 +133,50 @@ exports.resetPassword = catchAsync( async ( req, res, next ) => {
 
     // LOG THE USER IN SEND JWT
     sendJWTToken(user, 201, res)
+});
+
+exports.updateMyPassword = catchAsync( async (req, res, next) => {
+    // GET USER FROM COLLECTION
+    const user = await User.findById(req.user.id).select("+password");
+
+    // CHECK IF POSTED CURRENT PASSWORD IS CORRECT
+    if(!(await user.correctPassword(req.body.currentPassword, user.password))){
+        return next(new AppError("Your current password is wrong", 401))
+    }
+
+    // IF TRUE, UPDATE PASSWORD
+    user.password = req.body.password;
+    user.passwordConfirm = req.body.passwordConfirm;
+    await user.save();
+
+    // LOG IN USER, SEND JWT
+    sendJWTToken(user, 201, res)
+})
+
+exports.protect = catchAsync( async (req, res, next) => {
+    // GETTING TOKEN AND CHECK IF IT IS PRESENT
+    let token;
+    if(req.headers.authorization && req.headers.authorization.startsWith("Bearer")){
+        token = req.headers.authorization.split(" ")[1];
+    }
+
+    if(!token) return next(new AppError("You are not logged in! Please log in to get access", 401));
+
+    // TOKEN VERIFICATION
+    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+
+    // CHECK IF USER STILL EXISTS
+    const currentUser = await User.findById(decoded.id);
+    if(!currentUser){
+        return next(new AppError("The user belonging to this token does no longer exist", 401))
+    }
+
+    // CHECK IF USER CHANGED PASSWORD AFTER THE TOKEN WAS ISSUED
+    if(!currentUser.changedPasswordAfter(decoded.iat)){
+        return next(new AppError("User recently changed password! Please log in again.", 401))
+    }
+
+    // GRANT ACCESS TO PROTECTED ROUTE
+    req.user = currentUser;
+    next();
 });
