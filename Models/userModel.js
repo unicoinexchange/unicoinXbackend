@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
 const crypto = require("crypto");
+const bcrypt = require("bcryptjs");
 
 const userSchema = new  mongoose.Schema({
     name:{
@@ -44,12 +45,29 @@ const userSchema = new  mongoose.Schema({
     }
 });
 
+// ENCRYPTING/HASHING USERS PASSWORD
+userSchema.pre("save", async function(next){
+    // checking if password was modified
+    if(!this.isModified("password")) return next();
+
+    // if true then encrypt password
+    this.password = await bcrypt.hash(this.password, 12);
+
+    // delete passwordConfirm field
+    this.passwordConfirm = undefined;
+    next();
+})
+
 userSchema.methods.createOTP = async function(){
     const OTP = crypto.randomBytes(2).toString("hex");
     this.otpToken = crypto.createHash("sha256").update(OTP).digest("hex");
     
     this.otpExpires = Date.now() + 10 * 60 * 1000;
     return OTP;
+}
+
+userSchema.methods.correctPassword = async function(candidatePassword, userPassword){
+    return await bcrypt.compare(candidatePassword, userPassword)
 }
 
 const User = mongoose.model("User", userSchema);

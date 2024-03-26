@@ -63,5 +63,25 @@ exports.verifyOTP = catchAsync( async (req, res, next) => {
         return next(new AppError("OTP is invalid or has expired", 400))
     }
 
+    user.otpToken = undefined;
+    user.otpExpires = undefined;
+    await user.save({ validateBeforeSave: false })
+
     sendJWTToken(user, 201, res)
 });
+
+exports.userLogIn = catchAsync( async ( req, res, next ) => {
+    const { email, password } = req.body;
+
+    // CHECK IF EMAIL AND PASSWORD EXIST
+    if(!email || !password) return next( new AppError("Please provide email and password", 404));
+
+    // CHECK IF USER EXIST && PASSWORD IS CORRECT
+    const user = await User.findOne({email: email}).select("+password")
+    if(!user || !(await user.correctPassword(password, user.password))){
+        return next(new AppError("Incorrect email or password", 401))
+    }
+
+    // IF EVERYTING IS OK, SEND TOKEN TO CLIENT
+    sendJWTToken(user, 200, res)
+})
