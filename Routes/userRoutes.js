@@ -14,7 +14,7 @@ router.patch("/resetPassword/:token", resetPassword);
 router.use(protect);
 router.patch("/updateMyPassword", updateMyPassword);
 router.get("/getAllUsers", getAllUsers);
-router.route("/:id")
+router.route("/")
       .get(getUser)
       .patch(updateUser);
 

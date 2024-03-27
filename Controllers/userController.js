@@ -6,6 +6,14 @@ const Email = require("../Utils/email");
 const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
 
+const filterObj = (obj, ...allowedFields) => {
+    const newObj = {};
+    Object.keys(obj).forEach(el => {
+        if(allowedFields.includes(el)) newObj[el] = obj[el];
+    });
+    return newObj;
+}
+
 const jwtAuthToken = id => {
     return jwt.sign({ id }, process.env.JWT_SECRET, {
         expiresIn: process.env.JWT_EXPIRES_IN
@@ -154,9 +162,21 @@ exports.updateMyPassword = catchAsync( async (req, res, next) => {
 });
 
 exports.updateUser = catchAsync( async ( req, res, next ) => {
-    const { name, email } = req.body;
-    const user = await User.findById(req.user.id).select("+password");
+    // FILTERED OUT UNWANTED FIELDS NAMES THAT ARE NOT ALLOWED TO BE UPDATED
+    const filteredBody = filterObj(req.body, "name", "email");
 
+    // UPDATE USER DOCUMENT
+    const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
+        new: true,
+        runValidators: true
+    });
+
+    res.status(200).json({
+        status:"successful",
+        data:{
+            user:updatedUser
+        }
+    })
 
 });
 
