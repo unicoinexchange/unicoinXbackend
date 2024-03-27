@@ -132,7 +132,7 @@ exports.resetPassword = catchAsync( async ( req, res, next ) => {
         // MIDDLE WARE FUNCTION
 
     // LOG THE USER IN SEND JWT
-    sendJWTToken(user, 201, res)
+    sendJWTToken(user, 201, res);
 });
 
 exports.updateMyPassword = catchAsync( async (req, res, next) => {
@@ -151,6 +151,36 @@ exports.updateMyPassword = catchAsync( async (req, res, next) => {
 
     // LOG IN USER, SEND JWT
     sendJWTToken(user, 201, res)
+});
+
+exports.updateUser = catchAsync( async ( req, res, next ) => {
+    const { name, email } = req.body;
+    const user = await User.findById(req.user.id).select("+password");
+
+
+});
+
+exports.getAllUsers = catchAsync( async (req, res, next) => {
+    const users = await User.find();
+
+    res.status(200).json({
+        status: "successful",
+        results:users.length,
+        data:{
+            users:users
+        }
+    })
+});
+
+exports.getUser = catchAsync( async (req, res, next) => {
+    const user = await User.findById(req.user.id)
+
+    res.status(200).json({
+        status:"successful",
+        data:{
+            data: user
+        }
+    })
 })
 
 exports.protect = catchAsync( async (req, res, next) => {

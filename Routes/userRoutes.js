@@ -1,5 +1,5 @@
 const express = require("express");
-const { userSignUp, verifyOTP, userLogIn, forgotPassword, resetPassword, updateMyPassword, protect } = require("../Controllers/userController");
+const { getAllUsers, getUser, updateUser, userSignUp, verifyOTP, userLogIn, forgotPassword, resetPassword, updateMyPassword, protect } = require("../Controllers/userController");
 
 const router = express.Router();
 
@@ -13,7 +13,10 @@ router.patch("/resetPassword/:token", resetPassword);
 // FOR ALL PROTECTED ROUTE : USER NEED TO BE LOGIN
 router.use(protect);
 router.patch("/updateMyPassword", updateMyPassword);
-
+router.get("/getAllUsers", getAllUsers);
+router.route("/:id")
+      .get(getUser)
+      .patch(updateUser);
 
 
 module.exports = router;
