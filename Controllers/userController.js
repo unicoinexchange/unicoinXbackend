@@ -43,7 +43,7 @@ exports.userSignUp = catchAsync( async (req, res, next) => {
     })
 
     const OTPToken = await newUser.createOTP();
-    newUser.save({ validateBeforeSave: false })
+    newUser.save({ validateBeforeSave: false });
 
     try{
         await new Email(newUser, OTPToken).sendOTPEmail();
@@ -60,6 +60,7 @@ exports.userSignUp = catchAsync( async (req, res, next) => {
 });
 
 exports.verifyOTP = catchAsync( async (req, res, next) => {
+
     const userOTP = req.body.otp
     
     const hashedOtp = crypto.createHash("sha256").update(userOTP).digest("hex");
@@ -222,7 +223,7 @@ exports.protect = catchAsync( async (req, res, next) => {
     }
 
     // CHECK IF USER CHANGED PASSWORD AFTER THE TOKEN WAS ISSUED
-    if(!currentUser.changedPasswordAfter(decoded.iat)){
+    if(currentUser.changedPasswordAfter(decoded.iat)){
         return next(new AppError("User recently changed password! Please log in again.", 401))
     }
 

@@ -4,6 +4,7 @@ const AppError = require("./Utils/appError");
 const globalErrorHandler = require("./Controllers/errorController");
 const adminRouter = require("./Routes/adminRoutes");
 const userRouter = require("./Routes/userRoutes");
+const investmentRouter = require("./Routes/investmentRoutes");
 
 const app = express();
 app.use(express.json());
@@ -17,6 +18,7 @@ if(process.env.NODE_ENV === "development"){
 // ENDPOINT ROUTING BY MOUNTING e.g Mounting the router
 app.use("/api/v1/admin", adminRouter);
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/investment", investmentRouter);
 
 // HANDLING UNHANDLED ROUTE
 app.all("*", (req, res, next) => {

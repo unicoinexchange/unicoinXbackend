@@ -39,11 +39,22 @@ const userSchema = new  mongoose.Schema({
     passwordChangedAt: Date,
     otpToken: String,
     otpExpires: Date,
+    investmentPlan:{
+        type: mongoose.Schema.ObjectId,
+        ref:"Investment"
+    },
+    investmentStatus:{
+        type: Boolean,
+        default: false,
+        select:true,
+    },
+    investmentStartDate: Date,
+    investmentEndDate: Date,
     active:{
         type: Boolean,
         default: true,
         select: false
-    }
+    },
 });
 
 // ENCRYPTING/HASHING USERS PASSWORD
@@ -85,6 +96,16 @@ userSchema.methods.changedPasswordAfter = function(JWTTimestap){
     }
     return false;
 }
+
+// QUERY MIDDLEWARE TO POPULATE THE USER REFERENCE AUTHOMATICALLY WHEN EVER THERE IS A QUERY
+userSchema.pre(/^find/, function(next){
+    this.populate({
+        path:"investmentPlan",
+        // select:["name", "amount"],
+    });
+
+    next();
+});
 
 const User = mongoose.model("User", userSchema);
 module.exports = User;
