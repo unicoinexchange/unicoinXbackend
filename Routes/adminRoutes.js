@@ -5,6 +5,6 @@ const router = express.Router();
 
 router.post("/adminSignUp", adminSignUp);
 router.post("/adminVerifyOTP", adminVerifyOTP);
-// router.post("/adminLogin", adminLogin);
+router.post("/adminLogin", adminLogin);
 
 module.exports = router;

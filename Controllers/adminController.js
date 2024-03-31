@@ -50,19 +50,19 @@ exports.adminVerifyOTP = catchAsync( async (req, res, next) => {
     sendJWTToken(admin, 201, res);
 });
 
-// exports.adminLogin = catchAsync( async ( req, res, next ) => {
-//     const { email, password } = req.body;
+exports.adminLogin = catchAsync( async ( req, res, next ) => {
+    const { email, password } = req.body;
 
-//     // CHECK IF EMAIL AND PASSWORD EXIST
-//     if(!email || !password) return next( new AppError("Please provide email and password", 404));
+    // CHECK IF EMAIL AND PASSWORD EXIST
+    if(!email || !password) return next( new AppError("Please provide email and password", 404));
 
-//     // CHECK IF USER EXIST && PASSWORD IS CORRECT
-//     const admin = await Admin.findOne({email: email}).select("+password");
-//     if(!admin || !(await correctPassword(password, admin.password))){
-//         return next(new AppError("Incorrect email of password", 401))
-//     }
+    // CHECK IF USER EXIST && PASSWORD IS CORRECT
+    const admin = await Admin.findOne({email: email}).select("+password");
+    if(!admin || !(await correctPassword(password, admin.password))){
+        return next(new AppError("Incorrect email of password", 401))
+    }
 
-//     // IF EVERYTHING IS OK SEND TOKEN TO CLIENT
-//     sendJWTToken(admin, 200, res)
-// });
+    // IF EVERYTHING IS OK SEND TOKEN TO CLIENT
+    sendJWTToken(admin, 200, res)
+});
 
