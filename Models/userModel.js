@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
-const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
 
 const userSchema = new  mongoose.Schema({
@@ -36,6 +35,11 @@ const userSchema = new  mongoose.Schema({
             message:"Password are not the same!"
         }
     },
+    active:{
+        type: Boolean,
+        default: false,
+        select: false
+    },
     passwordChangedAt: Date,
     otpToken: String,
     otpExpires: Date,
@@ -50,11 +54,6 @@ const userSchema = new  mongoose.Schema({
     },
     investmentStartDate: Date,
     investmentEndDate: Date,
-    active:{
-        type: Boolean,
-        default: true,
-        select: false
-    },
 });
 
 // ENCRYPTING/HASHING USERS PASSWORD
@@ -77,17 +76,9 @@ userSchema.pre("save", function(next){
     next();
 })
 
-userSchema.methods.createOTP = async function(){
-    const OTP = crypto.randomBytes(2).toString("hex");
-    this.otpToken = crypto.createHash("sha256").update(OTP).digest("hex");
-    
-    this.otpExpires = Date.now() + 10 * 60 * 1000;
-    return OTP;
-}
-
-userSchema.methods.correctPassword = async function(candidatePassword, userPassword){
-    return await bcrypt.compare(candidatePassword, userPassword)
-}
+// userSchema.methods.correctPassword = async function(candidatePassword, userPassword){
+//     return await bcrypt.compare(candidatePassword, userPassword)
+// }
 
 userSchema.methods.changedPasswordAfter = function(JWTTimestap){
     if(this.passwordChangedAt){

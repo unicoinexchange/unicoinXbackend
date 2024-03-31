@@ -36,10 +36,15 @@ const adminSchema = new mongoose.Schema({
     },
     active:{
         type: Boolean,
-        default: true,
+        default: false,
         select: false
-    }
+    },
+    passwordChangedAt: Date,
+    otpToken: String,
+    otpExpires: Date,
 });
+
+
 
 const Admin = mongoose.model("Admin", adminSchema);
 module.exports = Admin;

@@ -4,7 +4,7 @@ const catchAsync = require("../Utils/catchAsync");
 const AppError = require("../Utils/appError");
 const Email = require("../Utils/email");
 const crypto = require("crypto");
-const jwt = require("jsonwebtoken");
+const { createOTP, sendJWTToken, correctPassword } = require("../Utils/appFeatures");
 
 const filterObj = (obj, ...allowedFields) => {
     const newObj = {};
@@ -12,26 +12,6 @@ const filterObj = (obj, ...allowedFields) => {
         if(allowedFields.includes(el)) newObj[el] = obj[el];
     });
     return newObj;
-}
-
-const jwtAuthToken = id => {
-    return jwt.sign({ id }, process.env.JWT_SECRET, {
-        expiresIn: process.env.JWT_EXPIRES_IN
-    })
-};
-
-const sendJWTToken = (user, statusCode, res) => {
-    const JWTToken = jwtAuthToken(user._id);
-
-    user.password = undefined;
-
-    res.status(statusCode).json({
-        status:"success",
-        jwtToken: JWTToken,
-        data:{
-            user:user
-        }
-    })
 }
 
 exports.userSignUp = catchAsync( async (req, res, next) => {
@@ -42,7 +22,7 @@ exports.userSignUp = catchAsync( async (req, res, next) => {
         passwordConfirm: req.body.passwordConfirm
     })
 
-    const OTPToken = await newUser.createOTP();
+    const OTPToken = await createOTP(newUser);
     newUser.save({ validateBeforeSave: false });
 
     try{
@@ -61,7 +41,7 @@ exports.userSignUp = catchAsync( async (req, res, next) => {
 
 exports.verifyOTP = catchAsync( async (req, res, next) => {
 
-    const userOTP = req.body.otp
+    const userOTP = req.body.otp;
     
     const hashedOtp = crypto.createHash("sha256").update(userOTP).digest("hex");
     
@@ -71,6 +51,7 @@ exports.verifyOTP = catchAsync( async (req, res, next) => {
         return next(new AppError("OTP is invalid or has expired", 400))
     }
 
+    user.active = true;
     user.otpToken = undefined;
     user.otpExpires = undefined;
     await user.save({ validateBeforeSave: false })
@@ -86,7 +67,7 @@ exports.userLogIn = catchAsync( async ( req, res, next ) => {
 
     // CHECK IF USER EXIST && PASSWORD IS CORRECT
     const user = await User.findOne({email: email}).select("+password")
-    if(!user || !(await user.correctPassword(password, user.password))){
+    if(!user || !(await correctPassword(password, user.password))){
         return next(new AppError("Incorrect email or password", 401))
     }
 
