@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const validator = require("validator");
+const bcrypt = require("bcryptjs");
 
 const adminSchema = new mongoose.Schema({
     name:{
@@ -44,7 +45,25 @@ const adminSchema = new mongoose.Schema({
     otpExpires: Date,
 });
 
+// ENCRYPTING/HASHING ADMIN PASSWORD
+adminSchema.pre("save", async function(next){
+    // checking if password was modified
+    if(!this.isModified("password")) return next();
 
+    // if true then encrypt password
+    this.password = await bcrypt.hash(this.password, 12);
+
+    // delete passwordConfirm field
+    this.passwordConfirm = undefined;
+    next();
+});
+
+adminSchema.pre("save", function(next){
+    if(!this.isModified("password") || this.isNew) return next();
+
+    this.passwordChangedAt = Date.now() - 1000;
+    next();
+});
 
 const Admin = mongoose.model("Admin", adminSchema);
 module.exports = Admin;

@@ -1,10 +1,10 @@
 const express = require("express");
-const { getAllUsers, getUser, updateUser, userSignUp, verifyOTP, userLogIn, forgotPassword, resetPassword, updateMyPassword, protect } = require("../Controllers/userController");
+const { getAllUsers, getUser, updateUser, userSignUp, userVerifyOTP, userLogIn, forgotPassword, resetPassword, updateMyPassword, protect } = require("../Controllers/userController");
 
 const router = express.Router();
 
 router.post("/userSignUp", userSignUp);
-router.post("/verifyOtp", verifyOTP);
+router.post("/userVerifyOTP", userVerifyOTP);
 router.post("/userLogIn", userLogIn);
 router.post("/forgotPassword", forgotPassword);
 router.patch("/resetPassword/:token", resetPassword);

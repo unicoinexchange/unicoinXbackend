@@ -39,7 +39,7 @@ exports.userSignUp = catchAsync( async (req, res, next) => {
     }
 });
 
-exports.verifyOTP = catchAsync( async (req, res, next) => {
+exports.userVerifyOTP = catchAsync( async (req, res, next) => {
 
     const userOTP = req.body.otp;
     

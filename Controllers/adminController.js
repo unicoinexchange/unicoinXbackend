@@ -30,14 +30,14 @@ exports.adminSignUp = catchAsync( async (req, res, next) => {
     };
 });
 
-exports.verifyOTP = catchAsync( async (req, res, next) => {
+exports.adminVerifyOTP = catchAsync( async (req, res, next) => {
 
     const adminOTP = req.body.otp;
 
     const hashedOtp = crypto.createHash("sha256").update(adminOTP).digest("hex");
 
-    const admin = await Admin.findOne({otpToken: hashedOtp, otpExpires: {$gt: Date.now()}});
-
+    const admin = await Admin.findOne({otpToken: hashedOtp, otpExpires: {$gt: Date.now()}})
+    
     if(!admin){
         return next(new AppError("OTP is invalid or has expired", 400));
     }
