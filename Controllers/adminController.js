@@ -1,9 +1,8 @@
 const Admin = require("../Models/adminModel");
-const AppError = require("../Utils/appError");
 const catchAsync = require("../Utils/catchAsync");
-const { createOTP, sendJWTToken, correctPassword } = require("../Utils/appFeatures");
+const { createOTP } = require("../Utils/appFeatures");
 const Email = require("../Utils/email");
-const crypto = require("crypto");
+const { forgotPassword, resetPassword, updateMyPassword, updateDetails, verifyOTP, login, protect } = require("./handlerFactory");
 
 exports.adminSignUp = catchAsync( async (req, res, next) => {
     const newAdmin = await Admin.create({
@@ -30,39 +29,40 @@ exports.adminSignUp = catchAsync( async (req, res, next) => {
     };
 });
 
-exports.adminVerifyOTP = catchAsync( async (req, res, next) => {
+exports.adminVerifyOTP = verifyOTP(Admin);
 
-    const adminOTP = req.body.otp;
+exports.adminLogin = login(Admin);
 
-    const hashedOtp = crypto.createHash("sha256").update(adminOTP).digest("hex");
+exports.adminForgetPassword = forgotPassword(Admin);
 
-    const admin = await Admin.findOne({otpToken: hashedOtp, otpExpires: {$gt: Date.now()}})
-    
-    if(!admin){
-        return next(new AppError("OTP is invalid or has expired", 400));
-    }
+exports.adminResetPassword = resetPassword(Admin);
 
-    admin.active = true;
-    admin.otpToken = undefined;
-    admin.otpExpires = undefined;
-    await admin.save({ validateBeforeSave: false });
+exports.adminUpdatePassword = updateMyPassword(Admin);
 
-    sendJWTToken(admin, 201, res);
+exports.updateAdmin = updateDetails(Admin);
+
+
+exports.getAllAdmin = catchAsync( async (req, res, next) => {
+    const admins = await Admin.find();
+
+    res.status(200).json({
+        status:"success",
+        result: admins.length,
+        data:{
+            DataTransferItem:admins
+        }
+    })
 });
 
-exports.adminLogin = catchAsync( async ( req, res, next ) => {
-    const { email, password } = req.body;
+exports.getAdmin = catchAsync( async(req, res, next) => {
+    const admin = await Admin.findById(req.user.id)
 
-    // CHECK IF EMAIL AND PASSWORD EXIST
-    if(!email || !password) return next( new AppError("Please provide email and password", 404));
-
-    // CHECK IF USER EXIST && PASSWORD IS CORRECT
-    const admin = await Admin.findOne({email: email}).select("+password");
-    if(!admin || !(await correctPassword(password, admin.password))){
-        return next(new AppError("Incorrect email of password", 401))
-    }
-
-    // IF EVERYTHING IS OK SEND TOKEN TO CLIENT
-    sendJWTToken(admin, 200, res)
+    res.status(200).json({
+        status:"success",
+        data:{
+            data:admin
+        }
+    })
 });
 
+exports.adminProtector = protect(Admin);

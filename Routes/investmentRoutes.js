@@ -1,10 +1,9 @@
 const express = require("express");
-const { createInvestment } = require("../Controllers/investmentController");
-const { protect } = require("../Controllers/userController");
+const { createInvestment, investmentProtector } = require("../Controllers/investmentController");
 
 const router = express.Router();
 
-router.use(protect);
+router.use(investmentProtector);
 router.post("/createInvestment", createInvestment);
 
 module.exports = router;

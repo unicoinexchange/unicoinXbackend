@@ -2,6 +2,7 @@ const Investment = require("../Models/investmentModel");
 const catchAsync = require("../Utils/catchAsync");
 const User = require("../Models/userModel");
 const AppError = require("../Utils/appError");
+const { protect } = require("../Controllers/handlerFactory");
 
 exports.createInvestment = catchAsync( async ( req, res, next ) => {
     // RETRIVE USER
@@ -33,6 +34,8 @@ exports.createInvestment = catchAsync( async ( req, res, next ) => {
         messeage: "Investment Successful"
     })
 });
+
+exports.investmentProtector = protect(User)
 
 
 

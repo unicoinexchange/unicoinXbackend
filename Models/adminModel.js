@@ -65,5 +65,13 @@ adminSchema.pre("save", function(next){
     next();
 });
 
+adminSchema.methods.changedPasswordAfter = function(JWTTimestap){
+    if(this.passwordChangedAt){
+        const changedTimestamp = parseInt(this.passwordChangedAt.getTime() / 1000, 10);
+        return JWTTimestap < changedTimestamp
+    }
+    return false;
+}
+
 const Admin = mongoose.model("Admin", adminSchema);
 module.exports = Admin;
