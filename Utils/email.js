@@ -46,10 +46,14 @@ module.exports = class Email{
     }
 
     async sendOTPEmail(){
-        this.send("verifyemail", "Verify Your Email")
+        this.send("verifyemail", "Verrify your email")
     }
 
     async sendPasswordResetEmail(){
-        this.send("passwordresetemail", "Password Reset Email")
+        this.send("passwordresetemail", "Password reset email")
+    }
+
+    async sendInvestmentEmail(){
+        this.send("investmentmail", "Investment confirmation email")
     }
 }

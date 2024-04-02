@@ -14,23 +14,21 @@ const filterObj = (obj, ...allowedFields) => {
     return newObj;
 }
 
-exports.verifyOTP = Model => catchAsync( async (req, res, next ) => {
-    const OTP = req.body.otp;
+exports.verifyOTP = Model => catchAsync( async (req, res, next) => {
+    const hashedOtp = crypto.createHash("sha256").update(req.body.otp).digest("hex");
     
-    const hashedOtp = crypto.createHash("sha256").update(OTP).digest("hex");
-    
-    const doc = Model.findOne({otpToken: hashedOtp, otpExpires: {$gt: Date.now()}})
-
+    const doc = await Model.findOne({otpToken: hashedOtp, otpExpires: {$gt: Date.now()}});
+    console.log("DOC: ", doc);
     if(!doc){
-        return next(new AppError("OTP is invalid or has expired", 400))
+        return next(new AppError("OTP is invalid or has expired", 400));
     }
 
     doc.active = true;
     doc.otpToken = undefined;
     doc.otpExpires = undefined;
-    await doc.save({ validateBeforeSave: false })
+    await doc.save({ validateBeforeSave: false });
 
-    sendJWTToken(doc, 201, res)
+    sendJWTToken(doc, 201, res);
 })
 
 exports.login = Model => catchAsync( async (req, res, next) => {
@@ -40,18 +38,18 @@ exports.login = Model => catchAsync( async (req, res, next) => {
     if(!email || !password) return next( new AppError("Please provide email and password", 404));
 
     // CHECK IF USER EXIST && PASSWORD IS CORRECT
-    const doc = await Model.findOne({email: email}).select("+password")
+    const doc = await Model.findOne({email: email}).select("+password");
     if(!doc || !(await correctPassword(password, doc.password))){
-        return next(new AppError("Incorrect email or password", 401))
+        return next(new AppError("Incorrect email or password", 401));
     }
 
     // IF EVERYTING IS OK, SEND TOKEN TO CLIENT
-    sendJWTToken(doc, 200, res)
+    sendJWTToken(doc, 200, res);
 })
 
 exports.forgotPassword = Model => catchAsync( async (req, res, next) => {
     // GET USER BASED ON USER EMAIL
-    const doc = await Model.findOne({email: req.body.email})
+    const doc = await Model.findOne({email: req.body.email});
 
     // CHECK IF USER EXIST
     if(!doc) return next(new AppError("There is no user with this email", 404));

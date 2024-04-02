@@ -1,5 +1,5 @@
 const express = require("express");
-const { adminSignUp, adminVerifyOTP, adminLogin, adminForgetPassword, adminResetPassword, adminUpdatePassword, updateAdmin, getAllAdmin, getAdmin, adminProtector } = require("../Controllers/adminController");
+const { adminSignUp, adminVerifyOTP, adminLogin, adminForgetPassword, adminResetPassword, adminUpdatePassword, updateAdmin, getAllAdmin, getAdmin, adminProtector, activateUserInvestment, deactivateUserInvestment } = require("../Controllers/adminController");
 
 const router = express.Router();
 
@@ -11,6 +11,8 @@ router.patch("/adminResetPassword/:token", adminResetPassword);
 
 // FOR ALL PROTECTED ROUTE: ADMIN NEED'S TO BE LOGGED IN
 router.use(adminProtector);
+router.post("/activateUserInvestment/:id", activateUserInvestment);
+router.post("/deactivateUserInvestment/:id", deactivateUserInvestment);
 router.patch("/adminUpdatePassword", adminUpdatePassword);
 router.get("/getAllAdmin", getAllAdmin);
 router.route("/")

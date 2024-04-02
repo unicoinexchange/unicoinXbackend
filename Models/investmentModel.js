@@ -14,7 +14,6 @@ const investmentSchema = new mongoose.Schema({
         type:Number,
         required: [true, "Please enter duration of investment"]
     },
-    investmentBonus: Number,
     referralBonus: Number,
     totalReturn: Number,
 })

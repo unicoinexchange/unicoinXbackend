@@ -11,7 +11,7 @@ exports.userSignUp = catchAsync( async (req, res, next) => {
         email: req.body.email,
         password: req.body.password,
         passwordConfirm: req.body.passwordConfirm
-    })
+    });
 
     const OTPToken = await createOTP(newUser);
     newUser.save({ validateBeforeSave: false });
