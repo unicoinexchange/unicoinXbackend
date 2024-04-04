@@ -43,18 +43,6 @@ exports.userUpdatePassword = updateMyPassword(User);
 
 exports.updateUser = updateDetails(User);
 
-exports.getAllUsers = catchAsync( async (req, res, next) => {
-    const users = await User.find();
-
-    res.status(200).json({
-        status: "successful",
-        results:users.length,
-        data:{
-            users:users
-        }
-    })
-});
-
 exports.getUser = catchAsync( async (req, res, next) => {
     const user = await User.findById(req.user.id)
 

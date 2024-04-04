@@ -70,6 +70,18 @@ exports.getAdmin = catchAsync( async(req, res, next) => {
     })
 });
 
+exports.getAllUsers = catchAsync( async (req, res, next) => {
+    const users = await User.find();
+
+    res.status(200).json({
+        status: "successful",
+        results:users.length,
+        data:{
+            users:users
+        }
+    })
+});
+
 exports.setUserInvestmentAmount = catchAsync( async (req, res, next) => {
     const user = await User.findById(req.params.id)
     if(!user) return next(new AppError("User not found", 404));
@@ -81,7 +93,7 @@ exports.setUserInvestmentAmount = catchAsync( async (req, res, next) => {
     })
 
     user.transactionHistory.unshift(history.id);
-    user.save({ validateBeforeSave: false });
+    await user.save({ validateBeforeSave: false });
 
     const investPlan = await Investment.findById(user.investmentPlan.id);
 
@@ -90,11 +102,6 @@ exports.setUserInvestmentAmount = catchAsync( async (req, res, next) => {
 
     let totalAmt = 0;
     userCurrentState.transactionHistory.map(el => totalAmt += el.amount)
-
-    // console.log("AMOUNTS: ",  userCurrentState.transactionHistory)
-    console.log(userCurrentState.transactionHistory.map(el => el.amount))
-    console.log("RESULT: ", userCurrentState.transactionHistory.length)
-    console.log("USER TRANSACTION HISTORY: ", totalAmt);
 
     // CLACULATE INVESTMENT INCREASE BY PERCENT
     const investmentIncrease = totalAmt * (1 + investPlan.totalReturn / 100);
@@ -125,9 +132,6 @@ const autoCalculateInvestment = async (user, investPlan) => {
     const millisecondsInDay = 24 * 60 * 60 * 1000;
     const intervalInMiliseconds = intervalInDays * millisecondsInDay;
 
-    // RUN THE TASK INITIALLY
-    calculateInvestment(user, investPlan);
-
     // SET UP AN INTERVAL TO RETURN THE TASK
     myTimer = setInterval(() => {
         calculateInvestment(user, investPlan);
@@ -154,7 +158,7 @@ exports.activateUserInvestment = catchAsync( async (req, res, next) => {
 
     res.status(200).json({
         status:"success",
-        message:"Investment acitivated"
+        message:"Investment activated"
     });
 });
 
