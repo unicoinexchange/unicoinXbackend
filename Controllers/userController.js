@@ -14,7 +14,7 @@ exports.userSignUp = catchAsync( async (req, res, next) => {
     });
 
     const OTPToken = await createOTP(newUser);
-    newUser.save({ validateBeforeSave: false });
+    await newUser.save({ validateBeforeSave: false });
 
     try{
         await new Email(newUser, OTPToken).sendOTPEmail();
@@ -26,7 +26,8 @@ exports.userSignUp = catchAsync( async (req, res, next) => {
     }catch(err){
         newUser.otpToken = undefined;
         newUser.otpExpires = undefined;
-        newUser.save({ validateBeforeSave: false })
+        newUser.save({ validateBeforeSave: false });
+        console.log(err);
     }
 });
 
@@ -64,5 +65,6 @@ exports.getUser = catchAsync( async (req, res, next) => {
         }
     })
 });
+
 
 exports.userProtector = protect(User);

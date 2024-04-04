@@ -27,7 +27,7 @@ exports.createInvestment = catchAsync( async ( req, res, next ) => {
     // CALCULATE INVESTMENT END DATE BASED ON PLAN DURATION AND OTHER CRITERIA
     user.investmentEndDate = new Date(new Date().getTime() + investment.duration);
 
-    user.save({ validateBeforeSave: false });
+    await user.save({ validateBeforeSave: false });
     
     res.status(200).json({
         status:"successful",

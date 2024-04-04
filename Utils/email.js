@@ -6,7 +6,15 @@ module.exports = class Email{
     constructor(user, otpToken){
         this.to = user.email;
         this.firstName = user.name.split(" ")[0];
+        this.lastName = user.name.split(" ")[1];
         this.OTPToken = otpToken;
+        if(user.investmentPlan){
+            this.investmentName = user.investmentPlan.name;
+            this.investmentAmount = user.investmentPlan.amount;
+            this.investmentDuration = user.investmentPlan.duration;
+            this.investmentReferralBonus = user.investmentPlan.referralBonus;
+            this.investmentTotalReturn = user.investmentPlan.totalReturn;
+        }
         this.from = `Unicoin Xchange <${process.env.EMAIL_USERNAME}>`;
     }
 
@@ -30,7 +38,13 @@ module.exports = class Email{
     async send(template, subject){
         const html = pug.renderFile(`${__dirname}/../views/email/${template}.pug`,{
             firstName: this.firstName,
+            lastName: this.lastName,
             otp: this.OTPToken,
+            investmentName:this.investmentName,
+            investmentAmount:this.investmentAmount,
+            investmentDuration:this.investmentDuration,
+            investmentReferralBonus:this.investmentReferralBonus,
+            investmentTotalReturn:this.investmentTotalReturn,
             subject: subject
         });
 
@@ -54,6 +68,6 @@ module.exports = class Email{
     }
 
     async sendInvestmentEmail(){
-        this.send("investmentmail", "Investment confirmation email")
+        this.send("investmentmail", "Investment activation email")
     }
 }

@@ -46,7 +46,7 @@ html(lang="en")
       box-sizing: border-box;
       display: block;
       margin: 0 auto;
-      max-width: 600px;
+      max-width: 800px;
       padding: 0;
       }
       .main {
@@ -75,7 +75,7 @@ html(lang="en")
       }
       p {
       font-family: Helvetica, sans-serif;
-      font-size: 16px;
+      font-size: 14px;
       font-weight: normal;
       margin: 0;
       margin-bottom: 16px;
@@ -239,7 +239,7 @@ html(lang="en")
   body
     table.body(role="presentation", border="0", cellpadding="0", cellspacing="0")
       tr
-        td &amp;nbsp;
+      td
         td.container
           .content
             // START CENTERED WHITE CONTAINER
@@ -248,17 +248,35 @@ html(lang="en")
               // START MAIN CONTENT AREA
               tr
                 td.wrapper
-                  p Hi #{firstName}
-                  p Your token to help you reset your password
+                h4 Hello #{firstName} #{lastName}
+                  p Your investment has just been activated
                   table.btn.btn-primary(role="presentation", border="0", cellpadding="0", cellspacing="0")
                     tbody
                       tr
-                        td(align="left")
-                          table(role="presentation", border="0", cellpadding="0", cellspacing="0")
-                            tbody
-                              tr
-                                td
-                  p Password reset token: #{otp}
+                      td(align="left")
+                        table(role="presentation", border="0", cellpadding="0", cellspacing="0")
+                          tbody
+                            tr
+                              td
+                  p We trust this message finds you in good health. We are pleased to announce your enrollment in our #{investmentName}, 
+                  p where you can enjoy a remarkable #{investmentTotalReturn}% profit after every #{investmentDuration} days.
+                  p This plan comes with a range of benefits designed to elevate your investment experience:
+
+                  h4 ADVANTAGES OF THE: #{investmentName}
+
+                  p 1. Accelerated Profit Potential: The #{investmentName} offers a remarkable #{investmentTotalReturn}% profit after every #{investmentDuration} days
+                  p 2. Priority Support: Enjoy access to a dedicated support team for swift assistance with any inquiries or concerns 
+                  p 3. Exclusive investment Insights: Gain access to exclusive market insights and strategies to stay ahead of trends and maximize your investment opportunities.
+
+                  h4 In summary, the #{investmentName} provides accelerated profits, priority support and exclusive insights tailored to enhance your investment experience.
+
+                  h4 Congratulations, your #{investmentName} was successfully activated and your investment has started reading.
+
+                  p Thank you for entrusting UnicoinXchange with your investment aspirations. We are committed to delivering a rewarding and secure experience.
+
+                  h4 Kind Regards,
+                  h4 UnicoinXchange
+
               // END MAIN CONTENT AREA
             // START FOOTER
             .footer
@@ -276,4 +294,4 @@ html(lang="en")
                     a(href="http://htmlemail.io") HTMLemail.io
             // END FOOTER
             // END CENTERED WHITE CONTAINER
-        td &amp;nbsp;
+        td

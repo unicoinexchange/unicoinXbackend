@@ -47,6 +47,10 @@ const userSchema = new  mongoose.Schema({
         type: mongoose.Schema.ObjectId,
         ref:"Investment"
     },
+    transactionHistory:{
+        type: [mongoose.Schema.ObjectId],
+        ref: "TransactionHistory"
+    },
     investmentStatus:{
         type: Boolean,
         default: false,
@@ -88,8 +92,10 @@ userSchema.methods.changedPasswordAfter = function(JWTTimestap){
 userSchema.pre(/^find/, function(next){
     this.populate({
         path:"investmentPlan",
-        // select:["name", "amount"],
-    });
+    })
+    this.populate({
+        path:"transactionHistory"
+    })
 
     next();
 });

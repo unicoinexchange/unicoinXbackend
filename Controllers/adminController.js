@@ -1,5 +1,6 @@
 const Admin = require("../Models/adminModel");
 const User = require("../Models/userModel");
+const TransactionHistory = require("../Models/transactionsModel");
 const Investment = require("../Models/investmentModel");
 const catchAsync = require("../Utils/catchAsync");
 const AppError = require("../Utils/appError");
@@ -16,7 +17,7 @@ exports.adminSignUp = catchAsync( async (req, res, next) => {
     });
 
     const OTPToken = await createOTP(newAdmin);
-    newAdmin.save({ validateBeforeSave: false });
+    await newAdmin.save({ validateBeforeSave: false });
 
     try{
         await new Email(newAdmin, OTPToken).sendOTPEmail();
@@ -28,7 +29,8 @@ exports.adminSignUp = catchAsync( async (req, res, next) => {
     }catch(err){
         newAdmin.otpToken = undefined;
         newAdmin.otpExpires = undefined;
-        newAdmin.save({ validateBeforeSave: false })
+        newAdmin.save({ validateBeforeSave: false });
+        console.log(err)
     };
 });
 
@@ -70,27 +72,45 @@ exports.getAdmin = catchAsync( async(req, res, next) => {
 
 exports.setUserInvestmentAmount = catchAsync( async (req, res, next) => {
     const user = await User.findById(req.params.id)
-
     if(!user) return next(new AppError("User not found", 404));
+
+    const history = await TransactionHistory.create({
+        amount: req.body.amount,
+        paymentMode: req.body.paymentMode,
+        TransactionDate: Date.now()
+    })
+
+    user.transactionHistory.unshift(history.id);
+    user.save({ validateBeforeSave: false });
 
     const investPlan = await Investment.findById(user.investmentPlan.id);
 
+    // CALCULATE USER PREVIOUS BALANCE
+    const userCurrentState = await User.findById(req.params.id)
+
+    let totalAmt = 0;
+    userCurrentState.transactionHistory.map(el => totalAmt += el.amount)
+
+    // console.log("AMOUNTS: ",  userCurrentState.transactionHistory)
+    console.log(userCurrentState.transactionHistory.map(el => el.amount))
+    console.log("RESULT: ", userCurrentState.transactionHistory.length)
+    console.log("USER TRANSACTION HISTORY: ", totalAmt);
+
     // CLACULATE INVESTMENT INCREASE BY PERCENT
-    const investmentIncrease = req.body.amount * (1 + investPlan.totalReturn / 100);
+    const investmentIncrease = totalAmt * (1 + investPlan.totalReturn / 100);
     investPlan.amount = investmentIncrease;
 
     await investPlan.save();
 
     res.status(200).json({
-        status:"success",
+        status:"success", 
         message:"Investment Amount Inserted"
     });
 });
 
 // FUNCTION TO CALCULATE INVESTMENT
 let myTimer;
-const calculateInvestment = async (investPlan) => {
-    console.log("AUTO CALCULATE IS RUNNING");
+const calculateInvestment = async (user, investPlan) => {
 
     const investmentIncrease = investPlan.amount * (1 + investPlan.totalReturn / 100);
     investPlan.amount = investmentIncrease;
@@ -98,7 +118,7 @@ const calculateInvestment = async (investPlan) => {
     await investPlan.save();
 }
 
-const autoCalculateInvestment = async (investPlan) => {
+const autoCalculateInvestment = async (user, investPlan) => {
     // CALCULATE THE INTERVALS IN MILLISECONDS
     const intervalInDays = investPlan.duration;
 
@@ -106,11 +126,11 @@ const autoCalculateInvestment = async (investPlan) => {
     const intervalInMiliseconds = intervalInDays * millisecondsInDay;
 
     // RUN THE TASK INITIALLY
-    calculateInvestment(investPlan);
+    calculateInvestment(user, investPlan);
 
     // SET UP AN INTERVAL TO RETURN THE TASK
     myTimer = setInterval(() => {
-        calculateInvestment(investPlan);
+        calculateInvestment(user, investPlan);
     }, intervalInMiliseconds)
 }
 
@@ -128,8 +148,8 @@ exports.activateUserInvestment = catchAsync( async (req, res, next) => {
     await user.save({ validateBeforeSave: false });
 
     if(user.investmentStatus === true){
-        // await new Email().sendInvestmentEmail(user, investPlan);
-        await autoCalculateInvestment(investPlan);
+        await new Email(user).sendInvestmentEmail();
+        await autoCalculateInvestment(user, investPlan);
     }
 
     res.status(200).json({
