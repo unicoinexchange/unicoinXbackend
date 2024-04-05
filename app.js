@@ -5,9 +5,14 @@ const globalErrorHandler = require("./Controllers/errorController");
 const adminRouter = require("./Routes/adminRoutes");
 const userRouter = require("./Routes/userRoutes");
 const investmentRouter = require("./Routes/investmentRoutes");
+const cors = require("cors");
 
 const app = express();
 app.use(express.json());
+
+// IMPLEMENT CORS
+app.use(cors());
+app.options("*", cors());
 
 // CHECKING FOR CURRENT ENVIROMENT
 if(process.env.NODE_ENV === "development"){
