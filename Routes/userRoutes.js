@@ -8,7 +8,7 @@ router.post("/userSignUp", userSignUp);
 router.post("/userVerifyOTP", userVerifyOTP);
 router.post("/userLogIn", userLogIn);
 router.post("/userForgetPassword", userForgetPassword);
-router.patch("/userResetPassword/:token", userResetPassword);
+router.patch("/userResetPassword", userResetPassword);
 
 
 // FOR ALL PROTECTED ROUTE : USER NEED'S TO BE LOGGED IN

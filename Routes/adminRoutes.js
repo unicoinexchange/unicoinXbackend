@@ -8,7 +8,7 @@ router.post("/adminSignUp", adminSignUp);
 router.post("/adminVerifyOTP", adminVerifyOTP);
 router.post("/adminLogin", adminLogin);
 router.post("/adminForgetPassword", adminForgetPassword);
-router.patch("/adminResetPassword/:token", adminResetPassword);
+router.patch("/adminResetPassword", adminResetPassword);
 
 // FOR ALL PROTECTED ROUTE: ADMIN NEED'S TO BE LOGGED IN
 router.use(adminProtector);
