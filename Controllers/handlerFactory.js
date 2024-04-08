@@ -15,11 +15,11 @@ const filterObj = (obj, ...allowedFields) => {
 }
 
 exports.verifyOTP = Model => catchAsync( async (req, res, next) => {
-    console.log("Model: ", Model);
+    
     const hashedOtp = crypto.createHash("sha256").update(req.body.otp).digest("hex");
-    console.log("OTP: ", typeof(hashedOtp));
+    
     const doc = await Model.findOne({$and: [{otpToken: hashedOtp}, {otpExpires: {$gt: Date.now()}}]});
-    console.log("DOC: ", doc);
+
     if(!doc){
         return next(new AppError("OTP is invalid or has expired", 400));
     }
@@ -78,11 +78,9 @@ exports.forgotPassword = Model => catchAsync( async (req, res, next) => {
 
 exports.resetPassword = Model => catchAsync( async (req, res, next) => {
     // GET USER BASED ON TOKEN
-    console.log("MODEL: ", Model)
     const hashedToken = crypto.createHash("sha256").update(req.body.otp).digest("hex");
-    console.log("HASHED TOKEN: ", hashedToken);
-    const doc = await Model.findOne({otpToken: hashedToken, otpExpires: {$gt: Date.now()}});
-    console.log("DOCUMENT", doc)
+    
+    const doc = await Model.findOne({$and: [{otpToken: hashedToken}, {otpExpires: {$gt: Date.now()}}]});
     // IF TOKEN HAS NOT EXPIRED AND THERE IS A USER SET THE NEW PASSWORD
     if(!doc) return next(new AppError("Token is invalid or has expired", 400));
 
