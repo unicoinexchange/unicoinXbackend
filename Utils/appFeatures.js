@@ -24,6 +24,7 @@ exports.sendJWTToken = ( operator, statusCode, res ) => {
     res.status(statusCode).json({
         status:"success",
         JWTToken: JWTToken,
+        message: "Login successfull",
         data:{
             user:operator
         }

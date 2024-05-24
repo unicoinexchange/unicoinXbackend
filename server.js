@@ -18,7 +18,7 @@ mongoose.connect(DB, {
     // useNewUrlParser: true,
     // useUnifiedTopology: true
 }).then(con => {
-    console.log("DB connection successfully");
+    console.log("DB connection successful");
 }).catch(err => {
     console.log(err);
 })

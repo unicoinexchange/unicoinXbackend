@@ -18,8 +18,8 @@ exports.verifyOTP = Model => catchAsync( async (req, res, next) => {
     
     const hashedOtp = crypto.createHash("sha256").update(req.body.otp).digest("hex");
     
-    const doc = await Model.findOne({$and: [{otpToken: hashedOtp}, {otpExpires: {$gt: Date.now()}}]});
-
+    const doc = await Model.findOne({$and: [{otpToken: hashedOtp}, {otpExpires: {$gt: new Date()}}]});
+    
     if(!doc){
         return next(new AppError("OTP is invalid or has expired", 400));
     }
@@ -78,9 +78,11 @@ exports.forgotPassword = Model => catchAsync( async (req, res, next) => {
 
 exports.resetPassword = Model => catchAsync( async (req, res, next) => {
     // GET USER BASED ON TOKEN
+ 
     const hashedToken = crypto.createHash("sha256").update(req.body.otp).digest("hex");
     
-    const doc = await Model.findOne({$and: [{otpToken: hashedToken}, {otpExpires: {$gt: Date.now()}}]});
+    const doc = await Model.findOne({$and: [{otpToken: hashedToken}, {otpExpires: {$gt: new Date()}}]});
+    
     // IF TOKEN HAS NOT EXPIRED AND THERE IS A USER SET THE NEW PASSWORD
     if(!doc) return next(new AppError("Token is invalid or has expired", 400));
 
@@ -128,6 +130,7 @@ exports.updateDetails = Model => catchAsync( async (req, res, next ) => {
 
     res.status(200).json({
         status:"successful",
+        message:"Details updated sucessfully",
         data:{
             user:updatedDoc
         }
@@ -140,7 +143,7 @@ exports.protect = Model => catchAsync( async (req, res, next) => {
     if(req.headers.authorization && req.headers.authorization.startsWith("Bearer")){
         token = req.headers.authorization.split(" ")[1];
     }
-
+    
     if(!token) return next(new AppError("You are not logged in! Please log in to get access", 401));
 
     // TOKEN VERIFICATION

@@ -1,5 +1,6 @@
 const Admin = require("../Models/adminModel");
 const User = require("../Models/userModel");
+const Contact = require("../Models/contactModal");
 const TransactionHistory = require("../Models/transactionsModel");
 const Investment = require("../Models/investmentModel");
 const catchAsync = require("../Utils/catchAsync");
@@ -139,7 +140,7 @@ const autoCalculateInvestment = async (user, investPlan) => {
 }
 
 exports.activateUserInvestment = catchAsync( async (req, res, next) => {
-    const user = await User.findById(req.params.id)
+    const user = await User.findById(req.body.id)
 
     if(!user) return next(new AppError("User not found", 404));
 
@@ -163,7 +164,7 @@ exports.activateUserInvestment = catchAsync( async (req, res, next) => {
 });
 
 exports.deactivateUserInvestment = catchAsync( async (req, res, next) => {
-    const user = await User.findById(req.params.id)
+    const user = await User.findById(req.body.id)
     if(!user) return next(new AppError("User not found", 404));
 
     if(user.investmentStatus === true){
@@ -177,6 +178,24 @@ exports.deactivateUserInvestment = catchAsync( async (req, res, next) => {
     res.status(200).json({
         status:"success",
         message:"Investment deactivated"
+    })
+});
+
+// FOR GETTING CONTACT INFORMATION FROM CLIENT
+exports.createContact = catchAsync (async (req, res, next) => {
+    const newContact = await Contact.create({
+        name:req.body.name,
+        email:req.body.email,
+        phoneNumber:req.body.phoneNumber,
+        subject:req.body.subject,
+        message:req.body.message
+    });
+
+    await newContact.save();
+     
+    res.status(200).json({
+        status:"successful",
+        message:"Message was successful"
     })
 });
 
