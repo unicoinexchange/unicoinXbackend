@@ -5,6 +5,7 @@ const globalErrorHandler = require("./Controllers/errorController");
 const adminRouter = require("./Routes/adminRoutes");
 const userRouter = require("./Routes/userRoutes");
 const investmentRouter = require("./Routes/investmentRoutes");
+const compression = require("compression");
 const cors = require("cors");
 
 const app = express();
@@ -14,11 +15,15 @@ app.use(express.json());
 app.use(cors());
 app.options("*", cors());
 
+// COMPRESSION
+app.use(compression());
+
 // CHECKING FOR CURRENT ENVIROMENT
 if(process.env.NODE_ENV === "development"){
     app.use(morgan("dev"))
     console.log("My application is currently on", process.env.NODE_ENV);
 }
+
 
 // ENDPOINT ROUTING BY MOUNTING e.g Mounting the router
 app.use("/api/v1/admin", adminRouter);
