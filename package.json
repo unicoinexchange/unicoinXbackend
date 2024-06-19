@@ -4,6 +4,7 @@
   "description": "A crypto investment platform",
   "main": "app.js",
   "scripts": {
+    "start": "node server.js",
     "dev": "nodemon server.js",
     "prod": "NODE_ENV=production nodemon server.js",
     "debug": "ndb server.js"
@@ -24,5 +25,8 @@
     "nodemon": "^3.1.0",
     "pug": "^3.0.2",
     "validator": "^13.11.0"
+  },
+  "engines":{
+    "none" : ">=10.0.0"
   }
 }
