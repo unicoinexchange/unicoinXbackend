@@ -191,7 +191,7 @@ exports.createContact = catchAsync (async (req, res, next) => {
         message:req.body.message
     });
 
-    await newContact.save();
+    await newContact.save(); 
      
     res.status(200).json({
         status:"successful",
