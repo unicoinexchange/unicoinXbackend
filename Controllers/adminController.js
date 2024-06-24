@@ -105,7 +105,7 @@ exports.setUserInvestmentAmount = catchAsync( async (req, res, next) => {
     userCurrentState.transactionHistory.map(el => totalAmt += el.amount)
 
     // CLACULATE INVESTMENT INCREASE BY PERCENT
-    const investmentIncrease = totalAmt * (1 + investPlan.totalReturn / 100);
+    const investmentIncrease = totalAmt * (1 + investPlan.percentIncrease / 100);
     investPlan.amount = investmentIncrease;
 
     await investPlan.save();
