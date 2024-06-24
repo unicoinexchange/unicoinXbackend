@@ -106,7 +106,7 @@ exports.setUserInvestmentAmount = catchAsync( async (req, res, next) => {
 
     // CLACULATE INVESTMENT INCREASE BY PERCENT
     const investmentIncrease = totalAmt * (1 + investPlan.percentIncrease / 100);
-    investPlan.amount = investmentIncrease;
+    investPlan.amount = investmentIncrease.toFixed(2);
 
     await investPlan.save();
 
