@@ -15,7 +15,7 @@ const investmentSchema = new mongoose.Schema({
         required: [true, "Please enter duration of investment"]
     },
     referralBonus: Number,
-    totalReturn: Number,
+    percentIncrease: Number,
 })
 
 
