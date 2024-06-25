@@ -83,6 +83,19 @@ exports.getAllUsers = catchAsync( async (req, res, next) => {
     })
 });
 
+exports.deleteUser = catchAsync( async (req, res, next) => {
+    const user = await User.findById(req.params.id);
+
+    await User.findByIdAndDelete(req.params.id);
+    await Investment.findByIdAndDelete(user.investmentPlan.id);
+    user.transactionHistory.map(id => TransactionHistory.findByIdAndDelete(id))
+    
+    res.status(200).json({
+        status: "successful",
+        message: "Client successfully deleted"
+    })
+})
+
 exports.setUserInvestmentAmount = catchAsync( async (req, res, next) => {
     const user = await User.findById(req.params.id)
     if(!user) return next(new AppError("User not found", 404));
