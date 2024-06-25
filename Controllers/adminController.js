@@ -86,14 +86,12 @@ exports.getAllUsers = catchAsync( async (req, res, next) => {
 exports.deleteUser = catchAsync( async (req, res, next) => {
     const user = await User.findById(req.params.id);
 
-    // await Investment.findByIdAndDelete(user.investmentPlan.id);
-    // user.transactionHistory.map(transaction => TransactionHistory.findByIdAndDelete(transaction.id));
+    await Investment.findByIdAndDelete(user.investmentPlan.id);
 
     for(var x = 0; x < user.transactionHistory.length; x++){
         var transactionId = user.transactionHistory[x].id
         await TransactionHistory.findByIdAndDelete(transactionId)
     }
-    user.transactionHistory.map(transaction => console.log(transaction.id));
     
     await User.findByIdAndDelete(req.params.id);
    
