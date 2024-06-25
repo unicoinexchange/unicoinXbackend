@@ -88,9 +88,14 @@ exports.deleteUser = catchAsync( async (req, res, next) => {
 
     // await Investment.findByIdAndDelete(user.investmentPlan.id);
     // user.transactionHistory.map(transaction => TransactionHistory.findByIdAndDelete(transaction.id));
+
+    for(var x = 0; x < user.transactionHistory.length; x++){
+        var transactionId = user.transactionHistory[x].id
+        await TransactionHistory.findByIdAndDelete(transactionId)
+    }
     user.transactionHistory.map(transaction => console.log(transaction.id));
     
-    // await User.findByIdAndDelete(req.params.id);
+    await User.findByIdAndDelete(req.params.id);
    
     
     res.status(200).json({
