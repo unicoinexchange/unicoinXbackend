@@ -104,7 +104,8 @@ exports.deleteUser = catchAsync( async (req, res, next) => {
 
 exports.setUserInvestmentAmount = catchAsync( async (req, res, next) => {
     const user = await User.findById(req.params.id)
-    console.log(req.params.id)
+    console.log("USER ID: ", req.params.id)
+    console.log("USER: ", user);
     if(!user) return next(new AppError("User not found", 404));
 
     const history = await TransactionHistory.create({
@@ -112,14 +113,16 @@ exports.setUserInvestmentAmount = catchAsync( async (req, res, next) => {
         paymentMode: req.body.paymentMode,
         TransactionDate: Date.now()
     })
-
+    console.log("HISTORY ID: ", history.id)
     user.transactionHistory.unshift(history.id);
     await user.save({ validateBeforeSave: false });
 
+    console.log("INVESTMENT PLAN ID: ", user.investmentPlan.id)
     const investPlan = await Investment.findById(user.investmentPlan.id);
 
     // CALCULATE USER PREVIOUS BALANCE
     const userCurrentState = await User.findById(req.params.id)
+    console.log("USER CURRENT STATE :", userCurrentState)
 
     let totalAmt = 0;
     userCurrentState.transactionHistory.map(el => totalAmt += el.amount)
