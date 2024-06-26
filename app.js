@@ -35,6 +35,14 @@ app.all("*", (req, res, next) => {
     next(new AppError(`Cant't find ${req.originalUrl} on this server!`, 404))
 });
 
+// Middleware to log detailed 404 errors
+app.use((req, res, next) => {
+    if (req.method === 'HEAD' && res.statusCode === 404) {
+      console.log(`404 Error: HEAD request to ${req.url}`);
+    }
+    next();
+  });
+
 app.use(globalErrorHandler)
 
 module.exports = app;
