@@ -9,8 +9,8 @@ exports.createInvestment = catchAsync( async ( req, res, next ) => {
     const user = await User.findById(req.user.id);
 
     // CHECK IF USER ALREADY HAS AN ACTIVE INVESTMENT
-    if(user.investmentPlan !== undefined) return next(new AppError("User already has an inactive investment", 400));
-    if(user.investmentStatus) return next(new AppError("User already has an active investment, You can only upgrade to a higher plan", 400));
+    if(user.investmentPlan !== undefined) return next(new AppError("You already has an inactive investment", 400));
+    if(user.investmentStatus) return next(new AppError("You already has an active investment, You can only upgrade to a higher plan", 400));
 
     // PROCEED IN CREATING A NEW INVESTMENT RECORD
     const investment = await Investment.create({
@@ -32,7 +32,7 @@ exports.createInvestment = catchAsync( async ( req, res, next ) => {
     
     res.status(200).json({
         status:"successful",
-        message: "Investment Successful"
+        message: "Investment details submitted Successful, proceed to payment"
     })
 });
 
