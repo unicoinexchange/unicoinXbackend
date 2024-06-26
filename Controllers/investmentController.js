@@ -18,7 +18,7 @@ exports.createInvestment = catchAsync( async ( req, res, next ) => {
 
     if(user.investmentStatus){
         res.status(200).json({
-            message:"You already has an active investment, You can only upgrade to a higher plan"
+            message:"You already have an active investment, You can only upgrade to a higher plan"
         })
         return;
     } 
