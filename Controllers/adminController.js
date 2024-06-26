@@ -104,7 +104,7 @@ exports.deleteUser = catchAsync( async (req, res, next) => {
 
 exports.setUserInvestmentAmount = catchAsync( async (req, res, next) => {
     const user = await User.findById(req.params.id)
-    conosole.log(req.params.id)
+    console.log(req.params.id)
     if(!user) return next(new AppError("User not found", 404));
 
     const history = await TransactionHistory.create({
