@@ -43,7 +43,7 @@ exports.createInvestment = catchAsync( async ( req, res, next ) => {
     
     res.status(200).json({
         status:"successful",
-        message: "Investment details submitted successful, proceed to payment"
+        message: "Investment details submitted successfully, proceed to payment"
     })
 });
 
