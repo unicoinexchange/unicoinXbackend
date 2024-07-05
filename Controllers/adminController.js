@@ -86,10 +86,12 @@ exports.getAllUsers = catchAsync( async (req, res, next) => {
 exports.deleteUser = catchAsync( async (req, res, next) => {
     const user = await User.findById(req.params.id);
 
-    if(user.investmentPlan.id === undefined ) return next(new AppError("User has no investment plan.", 401))
+    if(!user.investmentPlan) return await User.findByIdAndDelete(req.params.id);
+
     await Investment.findByIdAndDelete(user.investmentPlan.id);
 
-    if(user.transactionHistory.length <= 0) return next(new AppError("User has no transaction", 401))
+    if(user.transactionHistory.length === 0) return await User.findByIdAndDelete(req.params.id)
+
     for(var x = 0; x < user.transactionHistory.length; x++){
         var transactionId = user.transactionHistory[x].id
         await TransactionHistory.findByIdAndDelete(transactionId)
