@@ -106,7 +106,11 @@ exports.deleteUser = catchAsync( async (req, res, next) => {
 exports.setUserInvestmentAmount = catchAsync( async (req, res, next) => {
     const user = await User.findById(req.params.id)
   
-    if(!user) return new AppError("User not found", 404);
+    if(!user) return next(new AppError("User not found", 404));
+
+    if(!user.investmentPlan) return next(new AppError("User does not have an investment plan", 404));
+
+    const investPlan = await Investment.findById(user.investmentPlan.id);
 
     const history = await TransactionHistory.create({
         amount: req.body.amount,
@@ -116,8 +120,6 @@ exports.setUserInvestmentAmount = catchAsync( async (req, res, next) => {
     
     user.transactionHistory.unshift(history.id);
     await user.save({ validateBeforeSave: false });
-
-    const investPlan = await Investment.findById(user.investmentPlan.id);
 
     // CALCULATE USER PREVIOUS BALANCE
     const userCurrentState = await User.findById(req.params.id)
