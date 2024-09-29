@@ -90,6 +90,7 @@ exports.editUserInvestmentDetails = catchAsync( async (req, res, next) => {
     const investment = await Investment.findById(user.investmentPlan.id)
 
     investment.bonus = req.body.bonus;
+    investment.referralBonus = req.body.referralBonus;
     investment.totalDeposit = req.body.totalDeposit;
     investment.availableProfit = req.body.availableProfit;
     investment.totalWithdraw = req.body.totalWithdraw;
