@@ -83,6 +83,36 @@ exports.getAllUsers = catchAsync( async (req, res, next) => {
     })
 });
 
+exports.editUserInvestmentDetails = catchAsync( async (req, res, next) => {
+    const user = await User.findById(req.params.id);
+    if(!user.investmentPlan) return next(new AppError("User does not have an investment plan", 404));
+
+    const investment = await Investment.findById(user.investmentPlan.id)
+
+    investment.bonus = req.body.bonus;
+    investment.totalDeposit = req.body.totalDeposit;
+    investment.availableProfit = req.body.availableProfit;
+    investment.totalWithdraw = req.body.totalWithdraw;
+
+    await investment.save();
+
+    res.status(200).json({
+        status: "successful",
+        message: "Investment successfully updated"
+    })
+})
+
+exports.getUser = catchAsync( async (req, res, next) => {
+    const user = await User.findById(req.params.id)
+
+    res.status(200).json({
+        status: "successful",
+        data:{
+            user:user
+        }
+    })
+})
+
 exports.deleteUser = catchAsync( async (req, res, next) => {
     const user = await User.findById(req.params.id);
 
@@ -129,9 +159,7 @@ exports.setUserInvestmentAmount = catchAsync( async (req, res, next) => {
     let totalAmt = 0;
     userCurrentState.transactionHistory.map(el => totalAmt += el.amount)
 
-    // CLACULATE INVESTMENT INCREASE BY PERCENT
-    const investmentIncrease = totalAmt * (1 + investPlan.percentIncrease / 100);
-    investPlan.amount = investmentIncrease.toFixed(2);
+    investPlan.amount = totalAmt.toFixed(2);
 
     await investPlan.save();
 
@@ -160,7 +188,7 @@ const autoCalculateInvestment = async (user, investPlan) => {
 
     // SET UP AN INTERVAL TO RETURN THE TASK
     myTimer = setInterval(() => {
-        calculateInvestment(user, investPlan);
+        // calculateInvestment(user, investPlan);
     }, intervalInMiliseconds)
 }
 
@@ -178,7 +206,7 @@ exports.activateUserInvestment = catchAsync( async (req, res, next) => {
     if(user.investmentStatus === false) {
         user.investmentStatus = true;
         await new Email(user).sendInvestmentEmail();
-        await autoCalculateInvestment(user, investPlan);
+        // await autoCalculateInvestment(user, investPlan);
     }
 
     await user.save({ validateBeforeSave: false });

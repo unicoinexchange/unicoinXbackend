@@ -28,9 +28,12 @@ exports.createInvestment = catchAsync( async ( req, res, next ) => {
         name:req.body.name, 
         amount: 0.00,
         duration: req.body.duration,
-        investmentBonus: req.body.investmentBonus,
         referralBonus: req.body.referralBonus,
         percentIncrease: req.body.percentIncrease,
+        bonus: 0.00,
+        totalDeposit: 0.00,
+        availableProfit: 0.00,
+        totalWithdraw: 0.00
     })
 
     user.investmentPlan = investment.id;

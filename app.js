@@ -19,7 +19,7 @@ app.options("*", cors());
 app.use(compression());
 
 // CHECKING FOR CURRENT ENVIROMENT
-if(process.env.NODE_ENV === "development"){
+if(process.env.NODE_ENV === "production"){
     app.use(morgan("dev"))
     console.log("My application is currently on", process.env.NODE_ENV);
 }

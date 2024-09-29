@@ -16,6 +16,10 @@ const investmentSchema = new mongoose.Schema({
     },
     referralBonus: Number,
     percentIncrease: Number,
+    bonus: Number,
+    totalDeposit: Number,
+    availableProfit: Number,
+    totalWithdraw: Number
 })
 
 
