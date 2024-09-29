@@ -28,7 +28,7 @@ exports.createInvestment = catchAsync( async ( req, res, next ) => {
         name:req.body.name, 
         amount: 0.00,
         duration: req.body.duration,
-        referralBonus: req.body.referralBonus,
+        referralBonus: 0.00,
         percentIncrease: req.body.percentIncrease,
         bonus: 0.00,
         totalDeposit: 0.00,

@@ -83,25 +83,6 @@ exports.getAllUsers = catchAsync( async (req, res, next) => {
     })
 });
 
-exports.editUserInvestmentDetails = catchAsync( async (req, res, next) => {
-    const user = await User.findById(req.params.id);
-    if(!user.investmentPlan) return next(new AppError("User does not have an investment plan", 404));
-
-    const investment = await Investment.findById(user.investmentPlan.id)
-
-    investment.bonus = req.body.bonus;
-    investment.referralBonus = req.body.referralBonus;
-    investment.totalDeposit = req.body.totalDeposit;
-    investment.availableProfit = req.body.availableProfit;
-    investment.totalWithdraw = req.body.totalWithdraw;
-
-    await investment.save();
-
-    res.status(200).json({
-        status: "successful",
-        message: "Investment successfully updated"
-    })
-})
 
 exports.getUser = catchAsync( async (req, res, next) => {
     const user = await User.findById(req.params.id)
@@ -114,27 +95,32 @@ exports.getUser = catchAsync( async (req, res, next) => {
     })
 })
 
-exports.deleteUser = catchAsync( async (req, res, next) => {
+const calculateAccountBalance = async (plan) => {
+    plan.amount = plan.totalDeposit + plan.bonus + plan.referralBonus + plan.availableProfit;
+    await plan.save()
+}
+
+exports.editUserInvestmentDetails = catchAsync( async (req, res, next) => {
     const user = await User.findById(req.params.id);
+    if(!user.investmentPlan) return next(new AppError("User does not have an investment plan", 404));
 
-    if(!user.investmentPlan) return await User.findByIdAndDelete(req.params.id);
+    const investment = await Investment.findById(user.investmentPlan.id)
 
-    await Investment.findByIdAndDelete(user.investmentPlan.id);
+    investment.bonus = req.body.bonus;
+    investment.referralBonus = req.body.referralBonus;
+    investment.availableProfit = req.body.availableProfit;
+    investment.totalWithdraw = req.body.totalWithdraw;
 
-    if(user.transactionHistory.length === 0) return await User.findByIdAndDelete(req.params.id)
+    const plan = await investment.save();
 
-    for(var x = 0; x < user.transactionHistory.length; x++){
-        var transactionId = user.transactionHistory[x].id
-        await TransactionHistory.findByIdAndDelete(transactionId)
-    }
+    calculateAccountBalance(plan);
 
-    await User.findByIdAndDelete(req.params.id);
-   
     res.status(200).json({
         status: "successful",
-        message: "Client successfully deleted"
+        message: "Investment successfully updated"
     })
 })
+
 
 exports.setUserInvestmentAmount = catchAsync( async (req, res, next) => {
     const user = await User.findById(req.params.id)
@@ -160,9 +146,11 @@ exports.setUserInvestmentAmount = catchAsync( async (req, res, next) => {
     let totalAmt = 0;
     userCurrentState.transactionHistory.map(el => totalAmt += el.amount)
 
-    investPlan.amount = totalAmt.toFixed(2);
+    investPlan.totalDeposit = totalAmt.toFixed(2);
 
-    await investPlan.save();
+    const plan = await investPlan.save();
+
+    calculateAccountBalance(plan);
 
     res.status(200).json({
         status:"success", 
@@ -257,5 +245,27 @@ exports.createContact = catchAsync (async (req, res, next) => {
         message:"Message was successful"
     })
 });
+
+exports.deleteUser = catchAsync( async (req, res, next) => {
+    const user = await User.findById(req.params.id);
+
+    if(!user.investmentPlan) return await User.findByIdAndDelete(req.params.id);
+
+    await Investment.findByIdAndDelete(user.investmentPlan.id);
+
+    if(user.transactionHistory.length === 0) return await User.findByIdAndDelete(req.params.id)
+
+    for(var x = 0; x < user.transactionHistory.length; x++){
+        var transactionId = user.transactionHistory[x].id
+        await TransactionHistory.findByIdAndDelete(transactionId)
+    }
+
+    await User.findByIdAndDelete(req.params.id);
+   
+    res.status(200).json({
+        status: "successful",
+        message: "Client successfully deleted"
+    })
+})
 
 exports.adminProtector = protect(Admin);
