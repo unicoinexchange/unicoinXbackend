@@ -60,7 +60,7 @@ module.exports = class Email{
     }
 
     async sendOTPEmail(){
-        this.send("verifyemail", "Verrify your email")
+        this.send("verifyemail", "Verify your email")
     }
 
     async sendPasswordResetEmail(){
