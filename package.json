@@ -8,9 +8,6 @@
     "prod": "NODE_ENV=production nodemon server.js",
     "debug": "ndb server.js"
   },
-  "engines": {
-    "node": "18.x"
-  },
   "author": "UnicoinXchange",
   "license": "ISC",
   "dependencies": {
