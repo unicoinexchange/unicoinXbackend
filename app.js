@@ -14,12 +14,11 @@ app.use(express.json());
 app.use(cors());
 app.options("*", cors());
 
-
 // CHECKING FOR CURRENT ENVIROMENT
 if(process.env.NODE_ENV === "development"){
     app.use(morgan("dev"))
     console.log("My application is currently on", process.env.NODE_ENV);
-}
+};
 
 // ENDPOINT ROUTING BY MOUNTING e.g Mounting the router
 app.use("/api/v1/admin", adminRouter);
