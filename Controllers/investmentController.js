@@ -20,7 +20,7 @@ exports.createInvestment = catchAsync( async ( req, res, next ) => {
         investmentBonus: req.body.investmentBonus,
         referralBonus: req.body.referralBonus,
         totalReturn: req.body.totalReturn,
-    })
+    });
 
     user.investmentPlan = investment.id;
     user.investmentStartDate = new Date();
