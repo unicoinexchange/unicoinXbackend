@@ -83,62 +83,20 @@ exports.getAllUsers = catchAsync( async (req, res, next) => {
     })
 });
 
-
-exports.getUser = catchAsync( async (req, res, next) => {
-    const user = await User.findById(req.params.id)
-
-    res.status(200).json({
-        status: "successful",
-        data:{
-            user:user
-        }
-    })
-})
-
-const calculateAccountBalance = async (plan) => {
-    plan.amount = plan.totalDeposit + plan.bonus + plan.referralBonus + plan.availableProfit;
-    await plan.save()
-}
-
-exports.editUserInvestmentDetails = catchAsync( async (req, res, next) => {
-    const user = await User.findById(req.params.id);
-    if(!user.investmentPlan) return next(new AppError("User does not have an investment plan", 404));
-
-    const investment = await Investment.findById(user.investmentPlan.id)
-
-    investment.bonus = req.body.bonus;
-    investment.referralBonus = req.body.referralBonus;
-    investment.availableProfit = req.body.availableProfit;
-    investment.totalWithdraw = req.body.totalWithdraw;
-
-    const plan = await investment.save();
-
-    calculateAccountBalance(plan);
-
-    res.status(200).json({
-        status: "successful",
-        message: "Investment successfully updated"
-    })
-})
-
-
 exports.setUserInvestmentAmount = catchAsync( async (req, res, next) => {
     const user = await User.findById(req.params.id)
-  
     if(!user) return next(new AppError("User not found", 404));
-
-    if(!user.investmentPlan) return next(new AppError("User does not have an investment plan", 404));
-
-    const investPlan = await Investment.findById(user.investmentPlan.id);
 
     const history = await TransactionHistory.create({
         amount: req.body.amount,
         paymentMode: req.body.paymentMode,
         TransactionDate: Date.now()
     })
-    
+
     user.transactionHistory.unshift(history.id);
     await user.save({ validateBeforeSave: false });
+
+    const investPlan = await Investment.findById(user.investmentPlan.id);
 
     // CALCULATE USER PREVIOUS BALANCE
     const userCurrentState = await User.findById(req.params.id)
@@ -146,9 +104,9 @@ exports.setUserInvestmentAmount = catchAsync( async (req, res, next) => {
     let totalAmt = 0;
     userCurrentState.transactionHistory.map(el => totalAmt += el.amount)
 
-    investPlan.totalDeposit = totalAmt.toFixed(2);
-
-    const plan = await investPlan.save();
+    // CLACULATE INVESTMENT INCREASE BY PERCENT
+    const investmentIncrease = totalAmt * (1 + investPlan.totalReturn / 100);
+    investPlan.amount = investmentIncrease;
 
     calculateAccountBalance(plan);
 
@@ -177,7 +135,7 @@ const autoCalculateInvestment = async (user, investPlan) => {
 
     // SET UP AN INTERVAL TO RETURN THE TASK
     myTimer = setInterval(() => {
-        // calculateInvestment(user, investPlan);
+        calculateInvestment(user, investPlan);
     }, intervalInMiliseconds)
 }
 
@@ -186,19 +144,18 @@ exports.activateUserInvestment = catchAsync( async (req, res, next) => {
 
     if(!user) return next(new AppError("User not found", 404));
 
-    if(!user.investmentPlan) return next(new AppError("User cannot be activated without investment plan", 404));
-
-    if(user.transactionHistory.length === 0) return next(new AppError("User investment cannot be activated without transaction", 404))
-
     const investPlan = await Investment.findById(user.investmentPlan.id);
 
     if(user.investmentStatus === false) {
         user.investmentStatus = true;
-        await new Email(user).sendInvestmentEmail();
-        // await autoCalculateInvestment(user, investPlan);
     }
 
     await user.save({ validateBeforeSave: false });
+
+    if(user.investmentStatus === true){
+        await new Email(user).sendInvestmentEmail();
+        await autoCalculateInvestment(user, investPlan);
+    }
 
     res.status(200).json({
         status:"success",
@@ -209,10 +166,6 @@ exports.activateUserInvestment = catchAsync( async (req, res, next) => {
 exports.deactivateUserInvestment = catchAsync( async (req, res, next) => {
     const user = await User.findById(req.body.id)
     if(!user) return next(new AppError("User not found", 404));
-
-    if(!user.investmentPlan) return next(new AppError("User has no investment", 404));
-
-    if(!user.investmentStatus) return next(new AppError("User has no active investment", 404));
 
     if(user.investmentStatus === true){
         user.investmentStatus = false;
@@ -238,7 +191,7 @@ exports.createContact = catchAsync (async (req, res, next) => {
         message:req.body.message
     });
 
-    await newContact.save(); 
+    await newContact.save();
      
     res.status(200).json({
         status:"successful",

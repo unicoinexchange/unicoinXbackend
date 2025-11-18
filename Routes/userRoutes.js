@@ -1,12 +1,12 @@
 const express = require("express");
 const { getUser, updateUser, userSignUp, userVerifyOTP, userLogIn, userForgetPassword, userResetPassword, userUpdatePassword, userProtector} = require("../Controllers/userController");
-const { restrictTo } = require("../Controllers/handlerFactory")
+const { restrictTo } = require("../Controllers/handlerFactory");
 
 const router = express.Router();
 
 router.post("/userSignUp", userSignUp);
 router.post("/userVerifyOTP", userVerifyOTP);
-router.post("/userLogIn", userLogIn);
+router.post("/userLogIn", userLogIn); 
 router.post("/userForgetPassword", userForgetPassword);
 router.patch("/userResetPassword", userResetPassword);
 

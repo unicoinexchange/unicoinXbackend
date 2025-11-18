@@ -9,32 +9,18 @@ exports.createInvestment = catchAsync( async ( req, res, next ) => {
     const user = await User.findById(req.user.id);
 
     // CHECK IF USER ALREADY HAS AN ACTIVE INVESTMENT
-    if(user.investmentPlan !== undefined && user.investmentStatus === false){
-        res.status(200).json({
-            message:"You already have an inactive investment, complete your payment to activate"
-        })
-        return;
-    } 
-
-    if(user.investmentStatus){
-        res.status(200).json({
-            message:"You already have an active investment, You can only upgrade to a higher plan"
-        })
-        return;
-    } 
+    if(user.investmentPlan !== undefined) return next(new AppError("User already has an inactive investment", 400));
+    if(user.investmentStatus) return next(new AppError("User already has an active investment, You can only upgrade to a higher plan", 400));
 
     // PROCEED IN CREATING A NEW INVESTMENT RECORD
     const investment = await Investment.create({
         name:req.body.name, 
         amount: 0.00,
         duration: req.body.duration,
-        referralBonus: 0.00,
-        percentIncrease: req.body.percentIncrease,
-        bonus: 0.00,
-        totalDeposit: 0.00,
-        availableProfit: 0.00,
-        totalWithdraw: 0.00
-    })
+        investmentBonus: req.body.investmentBonus,
+        referralBonus: req.body.referralBonus,
+        totalReturn: req.body.totalReturn,
+    });
 
     user.investmentPlan = investment.id;
     user.investmentStartDate = new Date();
@@ -46,7 +32,7 @@ exports.createInvestment = catchAsync( async ( req, res, next ) => {
     
     res.status(200).json({
         status:"successful",
-        message: "Investment details submitted successfully, proceed to payment"
+        message: "Investment Successful"
     })
 });
 

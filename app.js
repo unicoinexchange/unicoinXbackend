@@ -5,7 +5,6 @@ const globalErrorHandler = require("./Controllers/errorController");
 const adminRouter = require("./Routes/adminRoutes");
 const userRouter = require("./Routes/userRoutes");
 const investmentRouter = require("./Routes/investmentRoutes");
-const compression = require("compression");
 const cors = require("cors");
 
 const app = express();
@@ -15,15 +14,11 @@ app.use(express.json());
 app.use(cors());
 app.options("*", cors());
 
-// COMPRESSION
-app.use(compression());
-
 // CHECKING FOR CURRENT ENVIROMENT
 if(process.env.NODE_ENV === "development"){
-    app.use(morgan("dev"))
+    app.use(morgan("dev"));
     console.log("My application is currently on", process.env.NODE_ENV);
-}
-
+};
 
 // ENDPOINT ROUTING BY MOUNTING e.g Mounting the router
 app.use("/api/v1/admin", adminRouter);
@@ -35,15 +30,7 @@ app.all("*", (req, res, next) => {
     next(new AppError(`Cant't find ${req.originalUrl} on this server!`, 404))
 });
 
-// Middleware to log detailed 404 errors
-app.use((req, res, next) => {
-    if (req.method === 'HEAD' && res.statusCode === 404) {
-      console.log(`404 Error: HEAD request to ${req.url}`);
-    }
-    next();
-  });
-
-app.use(globalErrorHandler)
+app.use(globalErrorHandler);
 
 module.exports = app;
 
