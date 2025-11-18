@@ -12,7 +12,7 @@ const filterObj = (obj, ...allowedFields) => {
         if(allowedFields.includes(el)) newObj[el] = obj[el];
     });
     return newObj;
-}
+};
 
 exports.verifyOTP = Model => catchAsync( async (req, res, next) => {
     
