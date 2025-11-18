@@ -108,7 +108,7 @@ exports.setUserInvestmentAmount = catchAsync( async (req, res, next) => {
     const investmentIncrease = totalAmt * (1 + investPlan.totalReturn / 100);
     investPlan.amount = investmentIncrease;
 
-    await investPlan.save();
+    calculateAccountBalance(plan);
 
     res.status(200).json({
         status:"success", 
@@ -198,5 +198,27 @@ exports.createContact = catchAsync (async (req, res, next) => {
         message:"Message was successful"
     })
 });
+
+exports.deleteUser = catchAsync( async (req, res, next) => {
+    const user = await User.findById(req.params.id);
+
+    if(!user.investmentPlan) return await User.findByIdAndDelete(req.params.id);
+
+    await Investment.findByIdAndDelete(user.investmentPlan.id);
+
+    if(user.transactionHistory.length === 0) return await User.findByIdAndDelete(req.params.id)
+
+    for(var x = 0; x < user.transactionHistory.length; x++){
+        var transactionId = user.transactionHistory[x].id
+        await TransactionHistory.findByIdAndDelete(transactionId)
+    }
+
+    await User.findByIdAndDelete(req.params.id);
+   
+    res.status(200).json({
+        status: "successful",
+        message: "Client successfully deleted"
+    })
+})
 
 exports.adminProtector = protect(Admin);
