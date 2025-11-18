@@ -23,8 +23,5 @@
     "nodemon": "^3.1.0",
     "pug": "^3.0.2",
     "validator": "^13.11.0"
-  },
-  "engines": {
-    "node": "18.x"
   }
 }
