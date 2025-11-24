@@ -47,7 +47,6 @@ exports.adminUpdatePassword = updateMyPassword(Admin);
 
 exports.updateAdmin = updateDetails(Admin);
 
-
 exports.getAllAdmin = catchAsync( async (req, res, next) => {
     const admins = await Admin.find();
 
@@ -83,6 +82,11 @@ exports.getAllUsers = catchAsync( async (req, res, next) => {
     })
 });
 
+// CALCULATE INVESTMENT PLAN
+const calculateAccountBalance = (investPlan) = {
+    
+};
+
 exports.setUserInvestmentAmount = catchAsync( async (req, res, next) => {
     const user = await User.findById(req.params.id)
     if(!user) return next(new AppError("User not found", 404));
@@ -97,9 +101,10 @@ exports.setUserInvestmentAmount = catchAsync( async (req, res, next) => {
     await user.save({ validateBeforeSave: false });
 
     const investPlan = await Investment.findById(user.investmentPlan.id);
-
+    console.log(investPlan)
     // CALCULATE USER PREVIOUS BALANCE
-    const userCurrentState = await User.findById(req.params.id)
+    const userCurrentState = await User.findById(req.params.id).populate("transactionHistory");
+    //   const userCurrentState = await User.findById(req.params.id);
 
     let totalAmt = 0;
     userCurrentState.transactionHistory.map(el => totalAmt += el.amount)
@@ -109,6 +114,8 @@ exports.setUserInvestmentAmount = catchAsync( async (req, res, next) => {
     investPlan.amount = investmentIncrease;
 
     await investPlan.save();
+
+    // calculateAccountBalance(investPlan);
 
     res.status(200).json({
         status:"success", 
