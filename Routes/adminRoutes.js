@@ -1,5 +1,5 @@
 const express = require("express");
-const { getAllUsers, adminSignUp, adminVerifyOTP, adminLogin, adminForgetPassword, adminResetPassword, adminUpdatePassword, updateAdmin, getAllAdmin, getAdmin, adminProtector, activateUserInvestment, deactivateUserInvestment, setUserInvestmentAmount, createContact } = require("../Controllers/adminController");
+const { getAllUsers, adminSignUp, adminVerifyOTP, adminLogin, adminForgetPassword, adminResetPassword, adminUpdatePassword, updateAdmin, getAllAdmin, getAdmin, adminProtector, activateUserInvestment, deactivateUserInvestment, setUserInvestmentAmount, createContact, deleteUser } = require("../Controllers/adminController");
 const { restrictTo } = require("../Controllers/handlerFactory")
 
 const router = express.Router();
@@ -15,6 +15,7 @@ router.post("/createContact", createContact);
 router.use(adminProtector);
 router.use(restrictTo("admin"));
 router.post("/setUserInvestmentAmount/:id", setUserInvestmentAmount);
+router.delete("/deleteUser/:id", deleteUser);
 router.post("/activateUserInvestment", activateUserInvestment);
 router.post("/deactivateUserInvestment", deactivateUserInvestment);
 router.patch("/adminUpdatePassword", adminUpdatePassword);

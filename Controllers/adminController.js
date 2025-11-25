@@ -171,12 +171,12 @@ exports.activateUserInvestment = catchAsync( async (req, res, next) => {
 });
 
 exports.deactivateUserInvestment = catchAsync( async (req, res, next) => {
-    const user = await User.findById(req.body.id)
+    const user = await User.findById(req.body.id);
     if(!user) return next(new AppError("User not found", 404));
 
     if(user.investmentStatus === true){
         user.investmentStatus = false;
-    }
+    };
 
     await user.save({ validateBeforeSave: false });
 
@@ -185,7 +185,7 @@ exports.deactivateUserInvestment = catchAsync( async (req, res, next) => {
     res.status(200).json({
         status:"success",
         message:"Investment deactivated"
-    })
+    });
 });
 
 // FOR GETTING CONTACT INFORMATION FROM CLIENT
@@ -203,7 +203,7 @@ exports.createContact = catchAsync (async (req, res, next) => {
     res.status(200).json({
         status:"successful",
         message:"Message was successful"
-    })
+    });
 });
 
 exports.deleteUser = catchAsync( async (req, res, next) => {
@@ -213,19 +213,19 @@ exports.deleteUser = catchAsync( async (req, res, next) => {
 
     await Investment.findByIdAndDelete(user.investmentPlan.id);
 
-    if(user.transactionHistory.length === 0) return await User.findByIdAndDelete(req.params.id)
+    if(user.transactionHistory.length === 0) return await User.findByIdAndDelete(req.params.id);
 
     for(var x = 0; x < user.transactionHistory.length; x++){
         var transactionId = user.transactionHistory[x].id
         await TransactionHistory.findByIdAndDelete(transactionId)
-    }
+    };
 
     await User.findByIdAndDelete(req.params.id);
    
     res.status(200).json({
         status: "successful",
         message: "Client successfully deleted"
-    })
-})
+    });
+});
 
 exports.adminProtector = protect(Admin);
