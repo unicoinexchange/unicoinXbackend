@@ -7,15 +7,41 @@ const investmentSchema = new mongoose.Schema({
         required:[true, "Subcripton must have a name"]
     },
     amount:{
-        type:Number,
+        type: Number,
         required: [true, "Please enter amount you want to invest"]
     },
     duration:{
-        type:Number,
+        type: Number,
         required: [true, "Please enter duration of investment"]
     },
-    referralBonus: Number,
-    totalReturn: Number,
+    dailyInterestRate: {
+        type: Number,
+        default: 0
+    },
+    referralBonus: {
+        type: Number,
+        default: 0.10
+    },
+    totalReturn: {
+        type: Number,
+        default: 0
+    },
+    availableProfit: {
+        type: Number,
+        default: 0
+    },
+    bonus: {
+        type: Number,
+        default: 0
+    },
+    totalDeposit: {
+        type: Number,
+        default: 0
+    },
+    totalWithdraw: {
+        type: Number,
+        default: 0
+    }
 })
 
 

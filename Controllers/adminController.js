@@ -47,7 +47,6 @@ exports.adminUpdatePassword = updateMyPassword(Admin);
 
 exports.updateAdmin = updateDetails(Admin);
 
-
 exports.getAllAdmin = catchAsync( async (req, res, next) => {
     const admins = await Admin.find();
 
@@ -83,10 +82,33 @@ exports.getAllUsers = catchAsync( async (req, res, next) => {
     })
 });
 
+// CALCULATE INVESTMENT PLAN
+const calculateAccountBalance = (investPlan) => {
+
+  const referralBonus = investPlan.amount * investPlan.referralBonus;
+  const availableProfit = investPlan.amount * investPlan.totalReturn;
+  const dailyBonus = investPlan.amount * investPlan.dailyInterestRate;
+  const totalReturn = investPlan.amount + availableProfit;
+  
+  const totalWithdrawable = referralBonus + availableProfit + dailyBonus;
+
+  return {
+    referralBonus,
+    availableProfit,
+    bonus: dailyBonus,
+    totalReturn,
+    totalDeposit: investPlan.amount,
+    totalWithdraw: totalWithdrawable,
+    percentIncrease: investPlan.totalReturn * 100
+  };
+};
+
+
 exports.setUserInvestmentAmount = catchAsync( async (req, res, next) => {
     const user = await User.findById(req.params.id)
     if(!user) return next(new AppError("User not found", 404));
 
+    // Create transaction history
     const history = await TransactionHistory.create({
         amount: req.body.amount,
         paymentMode: req.body.paymentMode,
@@ -96,10 +118,11 @@ exports.setUserInvestmentAmount = catchAsync( async (req, res, next) => {
     user.transactionHistory.unshift(history.id);
     await user.save({ validateBeforeSave: false });
 
+    // Get investment plan
     const investPlan = await Investment.findById(user.investmentPlan.id);
-
-    // CALCULATE USER PREVIOUS BALANCE
-    const userCurrentState = await User.findById(req.params.id)
+    
+    // Get user's total deposit
+    const userCurrentState = await User.findById(req.params.id).populate("transactionHistory");
 
     let totalAmt = 0;
     userCurrentState.transactionHistory.map(el => totalAmt += el.amount)
@@ -108,7 +131,20 @@ exports.setUserInvestmentAmount = catchAsync( async (req, res, next) => {
     const investmentIncrease = totalAmt * (1 + investPlan.totalReturn / 100);
     investPlan.amount = investmentIncrease;
 
-    calculateAccountBalance(plan);
+    // Calculate balance values
+    const calc = calculateAccountBalance(investPlan);
+
+    // Assign calculated values to investPlan
+    investPlan.referralBonus   = calc.referralBonus;
+    investPlan.availableProfit = calc.availableProfit;
+    investPlan.bonus           = calc.bonus;
+    investPlan.totalReturn     = calc.totalReturn;
+    investPlan.totalDeposit    = calc.totalDeposit;
+    investPlan.totalWithdraw   = calc.totalWithdraw;
+    investPlan.percentIncrease = calc.percentIncrease;
+
+    // Save final data
+    await investPlan.save();
 
     res.status(200).json({
         status:"success", 
@@ -164,12 +200,12 @@ exports.activateUserInvestment = catchAsync( async (req, res, next) => {
 });
 
 exports.deactivateUserInvestment = catchAsync( async (req, res, next) => {
-    const user = await User.findById(req.body.id)
+    const user = await User.findById(req.body.id);
     if(!user) return next(new AppError("User not found", 404));
 
     if(user.investmentStatus === true){
         user.investmentStatus = false;
-    }
+    };
 
     await user.save({ validateBeforeSave: false });
 
@@ -178,7 +214,7 @@ exports.deactivateUserInvestment = catchAsync( async (req, res, next) => {
     res.status(200).json({
         status:"success",
         message:"Investment deactivated"
-    })
+    });
 });
 
 // FOR GETTING CONTACT INFORMATION FROM CLIENT
@@ -196,7 +232,7 @@ exports.createContact = catchAsync (async (req, res, next) => {
     res.status(200).json({
         status:"successful",
         message:"Message was successful"
-    })
+    });
 });
 
 exports.deleteUser = catchAsync( async (req, res, next) => {
@@ -206,19 +242,19 @@ exports.deleteUser = catchAsync( async (req, res, next) => {
 
     await Investment.findByIdAndDelete(user.investmentPlan.id);
 
-    if(user.transactionHistory.length === 0) return await User.findByIdAndDelete(req.params.id)
+    if(user.transactionHistory.length === 0) return await User.findByIdAndDelete(req.params.id);
 
     for(var x = 0; x < user.transactionHistory.length; x++){
         var transactionId = user.transactionHistory[x].id
         await TransactionHistory.findByIdAndDelete(transactionId)
-    }
+    };
 
     await User.findByIdAndDelete(req.params.id);
    
     res.status(200).json({
         status: "successful",
         message: "Client successfully deleted"
-    })
-})
+    });
+});
 
 exports.adminProtector = protect(Admin);
