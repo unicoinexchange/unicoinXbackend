@@ -83,14 +83,32 @@ exports.getAllUsers = catchAsync( async (req, res, next) => {
 });
 
 // CALCULATE INVESTMENT PLAN
-const calculateAccountBalance = (investPlan) = {
-    
+const calculateAccountBalance = (investPlan) => {
+
+  const referralBonus = investPlan.amount * investPlan.referralBonus;
+  const availableProfit = investPlan.amount * investPlan.totalReturn;
+  const dailyBonus = investPlan.amount * investPlan.dailyInterestRate;
+  const totalReturn = investPlan.amount + availableProfit;
+  
+  const totalWithdrawable = referralBonus + availableProfit + dailyBonus;
+
+  return {
+    referralBonus,
+    availableProfit,
+    bonus: dailyBonus,
+    totalReturn,
+    totalDeposit: investPlan.amount,
+    totalWithdraw: totalWithdrawable,
+    percentIncrease: investPlan.totalReturn * 100
+  };
 };
+
 
 exports.setUserInvestmentAmount = catchAsync( async (req, res, next) => {
     const user = await User.findById(req.params.id)
     if(!user) return next(new AppError("User not found", 404));
 
+    // Create transaction history
     const history = await TransactionHistory.create({
         amount: req.body.amount,
         paymentMode: req.body.paymentMode,
@@ -100,11 +118,11 @@ exports.setUserInvestmentAmount = catchAsync( async (req, res, next) => {
     user.transactionHistory.unshift(history.id);
     await user.save({ validateBeforeSave: false });
 
+    // Get investment plan
     const investPlan = await Investment.findById(user.investmentPlan.id);
-    console.log(investPlan)
-    // CALCULATE USER PREVIOUS BALANCE
+    
+    // Get user's total deposit
     const userCurrentState = await User.findById(req.params.id).populate("transactionHistory");
-    //   const userCurrentState = await User.findById(req.params.id);
 
     let totalAmt = 0;
     userCurrentState.transactionHistory.map(el => totalAmt += el.amount)
@@ -113,9 +131,20 @@ exports.setUserInvestmentAmount = catchAsync( async (req, res, next) => {
     const investmentIncrease = totalAmt * (1 + investPlan.totalReturn / 100);
     investPlan.amount = investmentIncrease;
 
-    calculateAccountBalance(plan);
+    // Calculate balance values
+    const calc = calculateAccountBalance(investPlan);
 
-    // calculateAccountBalance(investPlan);
+    // Assign calculated values to investPlan
+    investPlan.referralBonus   = calc.referralBonus;
+    investPlan.availableProfit = calc.availableProfit;
+    investPlan.bonus           = calc.bonus;
+    investPlan.totalReturn     = calc.totalReturn;
+    investPlan.totalDeposit    = calc.totalDeposit;
+    investPlan.totalWithdraw   = calc.totalWithdraw;
+    investPlan.percentIncrease = calc.percentIncrease;
+
+    // Save final data
+    await investPlan.save();
 
     res.status(200).json({
         status:"success", 
