@@ -20,7 +20,7 @@ const investmentSchema = new mongoose.Schema({
     },
     referralBonus: {
         type: Number,
-        default: 0.10
+        default: 0
     },
     totalReturn: {
         type: Number,
