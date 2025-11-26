@@ -84,22 +84,20 @@ exports.getAllUsers = catchAsync( async (req, res, next) => {
 
 // CALCULATE INVESTMENT PLAN
 const calculateAccountBalance = (investPlan) => {
-
-  const referralBonus = investPlan.amount * investPlan.referralBonus;
-  const availableProfit = investPlan.amount * investPlan.totalReturn;
-  const dailyBonus = investPlan.amount * investPlan.dailyInterestRate;
-  const totalReturn = investPlan.amount + availableProfit;
   
-  const totalWithdrawable = referralBonus + availableProfit + dailyBonus;
+  const referralBonus = investPlan.referralBonus;
+  const dailyBonus = investPlan.bonus;
+  const availableProfit = investPlan.amount * (investPlan.dailyInterestRate / 100);
+  const amount = referralBonus + availableProfit + dailyBonus + investPlan.amount;
+  const totalWithdraw = amount
 
   return {
+    amount,
     referralBonus,
     availableProfit,
     bonus: dailyBonus,
-    totalReturn,
     totalDeposit: investPlan.amount,
-    totalWithdraw: totalWithdrawable,
-    percentIncrease: investPlan.totalReturn * 100
+    totalWithdraw: totalWithdraw,
   };
 };
 
@@ -127,14 +125,13 @@ exports.setUserInvestmentAmount = catchAsync( async (req, res, next) => {
     let totalAmt = 0;
     userCurrentState.transactionHistory.map(el => totalAmt += el.amount)
 
-    // CLACULATE INVESTMENT INCREASE BY PERCENT
-    const investmentIncrease = totalAmt * (1 + investPlan.totalReturn / 100);
-    investPlan.amount = investmentIncrease;
+    investPlan.amount = totalAmt;
 
     // Calculate balance values
     const calc = calculateAccountBalance(investPlan);
 
     // Assign calculated values to investPlan
+    investPlan.amount = calc.amount;
     investPlan.referralBonus   = calc.referralBonus;
     investPlan.availableProfit = calc.availableProfit;
     investPlan.bonus           = calc.bonus;
@@ -156,8 +153,10 @@ exports.setUserInvestmentAmount = catchAsync( async (req, res, next) => {
 let myTimer;
 const calculateInvestment = async (user, investPlan) => {
 
-    const investmentIncrease = investPlan.amount * (1 + investPlan.totalReturn / 100);
+    const investmentIncrease = investPlan.amount * (1 + investPlan.dailyInterestRate / 100);
     investPlan.amount = investmentIncrease;
+    investPlan.totalWithdraw = amount;
+    investPlan.availableProfit = amount * (investPlan.dailyInterestRate / 100)
 
     await investPlan.save();
 }

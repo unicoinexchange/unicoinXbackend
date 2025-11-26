@@ -17,7 +17,8 @@ exports.createInvestment = catchAsync( async ( req, res, next ) => {
         name:req.body.name, 
         amount: 0.00,
         duration: req.body.duration,
-        dailyInterestRate: req.body.dailyInterestRate
+        dailyInterestRate: req.body.dailyInterestRate,
+        totalReturn: req.body.totalReturn
     })
 
     user.investmentPlan = investment.id;
